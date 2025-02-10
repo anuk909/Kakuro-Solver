@@ -93,12 +93,28 @@ def get_puzzle_page(size: str, difficulty: str, puzzle_id: Optional[int] = None)
     except requests.RequestException as e:
         raise ValueError(f"Failed to fetch {url}: {e}")
 
-def extract_puzzle_id(html: str) -> Optional[int]:
-    """Extract puzzle ID from the page HTML."""
-    match = re.search(r'puzzle (\d+)', html)
-    if match:
-        return int(match.group(1))
-    return None
+def extract_puzzle_info(html: str, base_url: str) -> tuple[Optional[int], Optional[str]]:
+    """Extract puzzle ID and URL from the page HTML."""
+    # Extract puzzle ID
+    id_match = re.search(r'puzzle (\d+)', html)
+    puzzle_id = int(id_match.group(1)) if id_match else None
+    
+    # Extract canonical URL
+    soup = BeautifulSoup(html, 'html.parser')
+    canonical = soup.find('link', rel='canonical')
+    if isinstance(canonical, Tag):
+        url = canonical.get('href')
+        if isinstance(url, str):
+            return puzzle_id, url
+    
+    # Fallback: look for og:url
+    og_url = soup.find('meta', property='og:url')
+    if isinstance(og_url, Tag):
+        url = og_url.get('content')
+        if isinstance(url, str):
+            return puzzle_id, url
+            
+    return puzzle_id, None
 
 def sort_cells(cells: List[Dict]) -> List[Dict]:
     """Sort cells in order: wall cells, clue cells (right/down), then solution cells."""
@@ -199,14 +215,13 @@ def parse_cell(cell: BeautifulSoup, x: int, y: int) -> Optional[Dict]:
     
     return cell_data if len(cell_data) > 2 else None
 
-def save_puzzle(puzzle: Dict, size: str, difficulty: str, puzzle_id: int):
+def save_puzzle(puzzle: Dict, size: str, difficulty: str, puzzle_id: int, puzzle_url: str):
     """Save puzzle to JSON file with compact formatting."""
     # Ensure cells are sorted correctly: wall, clue (right/down), solution
     puzzle["cells"] = sort_cells(puzzle["cells"])
     
     # Add URL to puzzle data
-    base_url = "https://www.kakuroconquest.com"
-    puzzle["url"] = f"{base_url}/{size}/{difficulty}/{puzzle_id}"
+    puzzle["url"] = puzzle_url
     
     # Create kakuroconquest directory if it doesn't exist
     os.makedirs("kakuroconquest", exist_ok=True)
@@ -220,35 +235,27 @@ def save_puzzle(puzzle: Dict, size: str, difficulty: str, puzzle_id: int):
             break
         counter += 1
     
-    # Save with readable compact JSON formatting
-    def format_cells(cells):
-        lines = []
-        for cell in cells:
-            parts = []
-            if "x" in cell:
-                parts.append(f'"x": {cell["x"]}')
-            if "y" in cell:
-                parts.append(f'"y": {cell["y"]}')
-            if "wall" in cell:
-                parts.append('"wall": true')
-            if "right" in cell:
-                parts.append(f'"right": {cell["right"]}')
-            if "down" in cell:
-                parts.append(f'"down": {cell["down"]}')
-            if "value" in cell:
-                parts.append(f'"value": {cell["value"]}')
-            lines.append('    { ' + ', '.join(parts) + ' }')
-        return ',\n'.join(lines)
+    # Custom JSON encoder to maintain property order and format
+    class KakuroJSONEncoder(json.JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj, dict):
+                # Maintain specific order for cell properties
+                if all(k in ["x", "y", "wall", "right", "down", "value"] for k in obj.keys()):
+                    ordered = {}
+                    # Order: x, y, wall, right, down, value
+                    for key in ["x", "y", "wall", "right", "down", "value"]:
+                        if key in obj:
+                            ordered[key] = obj[key]
+                    return ordered
+            return super().default(obj)
+
+    # Format JSON with custom indentation
+    formatted_json = json.dumps(puzzle, indent=2, cls=KakuroJSONEncoder)
+    # Fix the array formatting to be on one line
+    formatted_json = re.sub(r'\[\n\s+(\d+),\n\s+(\d+)\n\s+\]', r'[\1, \2]', formatted_json)
     
     with open(filename, 'w') as f:
-        f.write('{\n')
-        f.write('  "size": [%d, %d],\n' % tuple(puzzle["size"]))
-        if "url" in puzzle:
-            f.write('  "url": "%s",\n' % puzzle["url"])
-        f.write('  "cells": [\n')
-        f.write(format_cells(puzzle["cells"]))
-        f.write('\n  ]\n')
-        f.write('}\n')
+        f.write(formatted_json + '\n')
     
     print(f"Saved puzzle to {filename}")
 
@@ -269,9 +276,10 @@ def main():
                 try:
                     print(f"Scraping {size} {difficulty} puzzle...")
                     html = get_puzzle_page(size, difficulty)
-                    puzzle_id = extract_puzzle_id(html)
-                    if not puzzle_id:
-                        print(f"Could not extract puzzle ID for {size} {difficulty}")
+                    base_url = "https://www.kakuroconquest.com"
+                    puzzle_id, puzzle_url = extract_puzzle_info(html, base_url)
+                    if not puzzle_id or not puzzle_url:
+                        print(f"Could not extract puzzle info for {size} {difficulty}")
                         continue
                     
                     # Solve the puzzle to get solution values
@@ -288,7 +296,7 @@ def main():
                         print(f"✗ Invalid puzzle data: {error}")
                         continue
                         
-                    save_puzzle(puzzle, size, difficulty, puzzle_id)
+                    save_puzzle(puzzle, size, difficulty, puzzle_id, puzzle_url)
                     print(f"✓ Scraped {size} {difficulty} puzzle {puzzle_id}")
                 except Exception as e:
                     print(f"✗ Error scraping puzzle: {e}")
