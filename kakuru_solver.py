@@ -26,8 +26,8 @@ class KakuroPuzzle:
         self.board: dict[Cell, ClueCell] = {}
         for cell in cells:
             x, y = cell["x"], cell["y"]
-            row_sum = cell.get("row_sum")
-            col_sum = cell.get("col_sum")
+            row_sum = cell.get("right")
+            col_sum = cell.get("down")
             # Support writing wall explicit or implicit
             is_wall = cell.get("wall") or row_sum or col_sum
             value = cell.get("value")
@@ -133,7 +133,7 @@ def create_svg(
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" style="background-color: white;">',
         "<style>",
         ".grid-line { stroke: #000; stroke-width: 1; }",
-        ".clue { fill: #808080; stroke: #000; stroke-width: 1; }",
+        ".clue { fill: #c0c0c0; stroke: #000; stroke-width: 1; }",
         ".blank { fill: #ffffff; stroke: #000; stroke-width: 1; }",
         ".clue-text { font-family: Arial,; font-size: 12px; fill: #000; }",
         ".solution { font-family: Arial; font-size: 24px; fill: #000; text-anchor: middle; dominant-baseline: middle; }",

@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 420" style="background-color: white;">
+<style>
+.grid-line { stroke: #000; stroke-width: 1; }
+.clue { fill: #c0c0c0; stroke: #000; stroke-width: 1; }
+.blank { fill: #ffffff; stroke: #000; stroke-width: 1; }
+.clue-text { font-family: Arial,; font-size: 12px; fill: #000; }
+.solution { font-family: Arial; font-size: 24px; fill: #000; text-anchor: middle; dominant-baseline: middle; }
+</style>
+<rect x="0" y="0" width="60" height="60" class="clue"/>
+<line x1="0" y1="0" x2="60" y2="60" class="grid-line"/>
+<rect x="0" y="60" width="60" height="60" class="clue"/>
+<line x1="0" y1="60" x2="60" y2="120" class="grid-line"/>
+<text x="40" y="80" class="clue-text">3</text>
+<rect x="0" y="120" width="60" height="60" class="clue"/>
+<line x1="0" y1="120" x2="60" y2="180" class="grid-line"/>
+<text x="40" y="140" class="clue-text">18</text>
+<rect x="0" y="180" width="60" height="60" class="clue"/>
+<line x1="0" y1="180" x2="60" y2="240" class="grid-line"/>
+<rect x="0" y="240" width="60" height="60" class="clue"/>
+<line x1="0" y1="240" x2="60" y2="300" class="grid-line"/>
+<text x="40" y="260" class="clue-text">13</text>
+<rect x="0" y="300" width="60" height="60" class="clue"/>
+<line x1="0" y1="300" x2="60" y2="360" class="grid-line"/>
+<text x="40" y="320" class="clue-text">17</text>
+<rect x="0" y="360" width="60" height="60" class="clue"/>
+<line x1="0" y1="360" x2="60" y2="420" class="grid-line"/>
+<text x="40" y="380" class="clue-text">16</text>
+<rect x="60" y="0" width="60" height="60" class="clue"/>
+<line x1="60" y1="0" x2="120" y2="60" class="grid-line"/>
+<text x="70" y="50" class="clue-text">4</text>
+<rect x="60" y="60" width="60" height="60" class="blank"/>
+<rect x="60" y="120" width="60" height="60" class="blank"/>
+<rect x="60" y="180" width="60" height="60" class="clue"/>
+<line x1="60" y1="180" x2="120" y2="240" class="grid-line"/>
+<text x="70" y="230" class="clue-text">17</text>
+<rect x="60" y="240" width="60" height="60" class="blank"/>
+<rect x="60" y="300" width="60" height="60" class="blank"/>
+<rect x="60" y="360" width="60" height="60" class="blank"/>
+<rect x="120" y="0" width="60" height="60" class="clue"/>
+<line x1="120" y1="0" x2="180" y2="60" class="grid-line"/>
+<text x="130" y="50" class="clue-text">9</text>
+<rect x="120" y="60" width="60" height="60" class="blank"/>
+<rect x="120" y="120" width="60" height="60" class="blank"/>
+<rect x="120" y="180" width="60" height="60" class="clue"/>
+<line x1="120" y1="180" x2="180" y2="240" class="grid-line"/>
+<text x="160" y="200" class="clue-text">30</text>
+<text x="130" y="230" class="clue-text">20</text>
+<rect x="120" y="240" width="60" height="60" class="blank"/>
+<rect x="120" y="300" width="60" height="60" class="blank"/>
+<rect x="120" y="360" width="60" height="60" class="blank"/>
+<rect x="180" y="0" width="60" height="60" class="clue"/>
+<line x1="180" y1="0" x2="240" y2="60" class="grid-line"/>
+<rect x="180" y="60" width="60" height="60" class="clue"/>
+<line x1="180" y1="60" x2="240" y2="120" class="grid-line"/>
+<text x="190" y="110" class="clue-text">24</text>
+<rect x="180" y="120" width="60" height="60" class="blank"/>
+<rect x="180" y="180" width="60" height="60" class="blank"/>
+<rect x="180" y="240" width="60" height="60" class="blank"/>
+<rect x="180" y="300" width="60" height="60" class="clue"/>
+<line x1="180" y1="300" x2="240" y2="360" class="grid-line"/>
+<text x="220" y="320" class="clue-text">12</text>
+<rect x="180" y="360" width="60" height="60" class="clue"/>
+<line x1="180" y1="360" x2="240" y2="420" class="grid-line"/>
+<rect x="240" y="0" width="60" height="60" class="clue"/>
+<line x1="240" y1="0" x2="300" y2="60" class="grid-line"/>
+<rect x="240" y="60" width="60" height="60" class="clue"/>
+<line x1="240" y1="60" x2="300" y2="120" class="grid-line"/>
+<text x="280" y="80" class="clue-text">12</text>
+<rect x="240" y="120" width="60" height="60" class="clue"/>
+<line x1="240" y1="120" x2="300" y2="180" class="grid-line"/>
+<text x="280" y="140" class="clue-text">9</text>
+<text x="250" y="170" class="clue-text">19</text>
+<rect x="240" y="180" width="60" height="60" class="blank"/>
+<rect x="240" y="240" width="60" height="60" class="blank"/>
+<rect x="240" y="300" width="60" height="60" class="blank"/>
+<rect x="240" y="360" width="60" height="60" class="clue"/>
+<line x1="240" y1="360" x2="300" y2="420" class="grid-line"/>
+<text x="280" y="380" class="clue-text">16</text>
+<rect x="300" y="0" width="60" height="60" class="clue"/>
+<line x1="300" y1="0" x2="360" y2="60" class="grid-line"/>
+<text x="310" y="50" class="clue-text">11</text>
+<rect x="300" y="60" width="60" height="60" class="blank"/>
+<rect x="300" y="120" width="60" height="60" class="blank"/>
+<rect x="300" y="180" width="60" height="60" class="blank"/>
+<rect x="300" y="240" width="60" height="60" class="clue"/>
+<line x1="300" y1="240" x2="360" y2="300" class="grid-line"/>
+<text x="310" y="290" class="clue-text">11</text>
+<rect x="300" y="300" width="60" height="60" class="blank"/>
+<rect x="300" y="360" width="60" height="60" class="blank"/>
+<rect x="360" y="0" width="60" height="60" class="clue"/>
+<line x1="360" y1="0" x2="420" y2="60" class="grid-line"/>
+<text x="370" y="50" class="clue-text">23</text>
+<rect x="360" y="60" width="60" height="60" class="blank"/>
+<rect x="360" y="120" width="60" height="60" class="blank"/>
+<rect x="360" y="180" width="60" height="60" class="blank"/>
+<rect x="360" y="240" width="60" height="60" class="clue"/>
+<line x1="360" y1="240" x2="420" y2="300" class="grid-line"/>
+<text x="370" y="290" class="clue-text">8</text>
+<rect x="360" y="300" width="60" height="60" class="blank"/>
+<rect x="360" y="360" width="60" height="60" class="blank"/>
+</svg>
