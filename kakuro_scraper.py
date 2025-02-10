@@ -224,7 +224,11 @@ def save_puzzle(puzzle: Dict, size: str, difficulty: str, puzzle_id: int):
     def format_cells(cells):
         lines = []
         for cell in cells:
-            parts = [f'"x": {cell["x"]}, "y": {cell["y"]}']
+            parts = []
+            if "x" in cell:
+                parts.append(f'"x": {cell["x"]}')
+            if "y" in cell:
+                parts.append(f'"y": {cell["y"]}')
             if "wall" in cell:
                 parts.append('"wall": true')
             if "right" in cell:
