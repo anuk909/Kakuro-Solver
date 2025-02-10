@@ -6,6 +6,7 @@ import numpy as np
 import easyocr
 from pathlib import Path
 from typing import Any
+from tqdm import tqdm
 
 
 def detect_grid_lines(img: np.ndarray) -> tuple[list[int], list[int]]:
@@ -123,9 +124,8 @@ def process_kakuro_image(image_path: Path) -> Any:
     # Process cells
     clue_cells = []
 
-    for x in range(cols):
-        for y in range(rows):
-            # Extract cell
+    for x in tqdm(range(cols), desc="Processing columns"):
+        for y in tqdm(range(rows), desc=f"Processing cells in column {x}", leave=False):            # Extract cell
             cell = gray[
                 horizontal_lines[y] + 2 : horizontal_lines[y + 1] + 2,
                 vertical_lines[x] + 2 : vertical_lines[x + 1] + 2,

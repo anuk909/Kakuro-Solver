@@ -2,3 +2,4 @@ z3-solver
 easyocr
 cv2
 numpy
+tqdm
