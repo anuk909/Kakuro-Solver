@@ -64,6 +64,12 @@ python kakuru_solver.py --input examples/puzzle.json --output examples/solution.
 
 <img src="examples/solution.svg" width="300">
 
+To solve a Kakuro puzzle and save the solution as a json file:
+
+```sh
+python kakuru_solver.py --input examples/puzzle.json --output examples/solution.json --mode solve
+```
+
 To display a Kakuro puzzle without solving it:
 
 ```sh
