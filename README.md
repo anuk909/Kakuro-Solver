@@ -7,7 +7,7 @@ The solver can read a Kakuro puzzle from a JSON file, solve it, and output the s
 
 Kakuro is a logic-based number puzzle that is often referred to as a mathematical crossword. The objective is to fill all of the blank squares in the grid with digits from 1 to 9 such that the sum of the numbers in each horizontal and vertical block matches the clue associated with that block. Additionally, no number may be used more than once in any block. For more information, you can visit [Wikipedia](https://en.wikipedia.org/wiki/Kakuro).
 
-Kakuru puzzles comes in all shapes and sizes, this is an example for simple kakuro of 5x5:
+Kakuro puzzles comes in all shapes and sizes, this is an example for simple kakuro of 5x5:
 
 <img src="examples/raw_puzzle_image.png" width="300">
 
@@ -63,7 +63,7 @@ The solver can be used via the command line. The following options are available
 To solve a Kakuro puzzle and save the solution as an SVG file:
 
 ```sh
-python kakuru_solver.py --input examples/puzzle.json --output examples/solution.svg --mode solve
+python kakuro_solver.py --input examples/puzzle.json --output examples/solution.svg --mode solve
 ```
 
 **SVG Output:**
@@ -73,13 +73,13 @@ python kakuru_solver.py --input examples/puzzle.json --output examples/solution.
 To solve a Kakuro puzzle and save the solution as a json file:
 
 ```sh
-python kakuru_solver.py --input examples/puzzle.json --output examples/solution.json --mode solve
+python kakuro_solver.py --input examples/puzzle.json --output examples/solution.json --mode solve
 ```
 
 To display a Kakuro puzzle without solving it:
 
 ```sh
-python kakuru_solver.py --input examples/puzzle.json --output examples/puzzle.svg --mode show
+python kakuro_solver.py --input examples/puzzle.json --output examples/puzzle.svg --mode show
 ```
 
 **SVG Output:**
