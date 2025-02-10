@@ -1,52 +1,8 @@
 from z3 import *
 import json
 import argparse
-from typing import TypeAlias, Optional
-from dataclasses import dataclass
 from pathlib import Path
-
-# Type definitions
-Cell = tuple[int, int]  # (row, col)
-Solution: TypeAlias = list[list[int]]
-
-
-@dataclass
-class ClueCell:
-    x: int
-    y: int
-    row_sum: int | None
-    col_sum: int | None
-    is_wall: bool
-    value: int | None
-
-
-class KakuroPuzzle:
-    def __init__(self, size, cells):
-        self.size: tuple[int, int] = size
-        self.board: dict[Cell, ClueCell] = {}
-        for cell in cells:
-            x, y = cell["x"], cell["y"]
-            row_sum = cell.get("right")
-            col_sum = cell.get("down")
-            # Support writing wall explicit or implicit
-            is_wall = cell.get("wall") or row_sum or col_sum
-            value = cell.get("value")
-            if value:
-                assert not is_wall, "Cell cannot be both wall and value"
-                assert value in range(1, 10), "Value must be between 1 and 9"
-            if is_wall or value:
-                self.board[(x, y)] = ClueCell(x, y, row_sum, col_sum, is_wall, value)
-
-    @property
-    def clues(self):
-        return self.board.values()
-
-    def is_wall(self, row: int, col: int) -> bool:
-        cell = self.board.get((row, col))
-        return cell and cell.is_wall
-
-    def get_clue(self, row: int, col: int) -> ClueCell | None:
-        return self.board.get((row, col))
+from common import KakuroPuzzle, Solution, Cell, SolutionCell
 
 
 def get_sum_run(
@@ -82,10 +38,7 @@ def solve_kakuro(puzzle: KakuroPuzzle) -> Solution | None:
     for i in range(rows):
         for j in range(cols):
             if clue := puzzle.get_clue(i, j):
-                if puzzle.is_wall:
-                    solver.add(grid[i][j] == 0)
-                elif value := puzzle.value:
-                    solver.add(grid[i][j] == value)
+                solver.add(grid[i][j] == 0)
             else:
                 solver.add(grid[i][j] >= 1)
                 solver.add(grid[i][j] <= 9)
@@ -111,76 +64,15 @@ def solve_kakuro(puzzle: KakuroPuzzle) -> Solution | None:
 
     if solver.check() == sat:
         model = solver.model()
-        return [
-            [model.evaluate(grid[i][j]).as_long() for j in range(cols)]
-            for i in range(rows)
-        ]
+        solution_cells = []
+
+        for i in range(rows):
+            for j in range(cols):
+                if value := model.evaluate(grid[i][j]).as_long():
+                    if value > 0:
+                        solution_cells.append(SolutionCell(i, j, value))
+        return solution_cells
     return None
-
-
-def create_svg(
-    puzzle: KakuroPuzzle,
-    solution: Optional[Solution] = None,
-    show_solution: bool = True,
-) -> str:
-    """Create SVG representation of the puzzle/solution"""
-    cell_size = 60
-    rows, cols = puzzle.size
-    width = cols * cell_size
-    height = rows * cell_size
-
-    svg_lines = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" style="background-color: white;">',
-        "<style>",
-        ".grid-line { stroke: #000; stroke-width: 1; }",
-        ".wall { fill: #c0c0c0; stroke: #000; stroke-width: 1; }",
-        ".blank { fill: #ffffff; stroke: #000; stroke-width: 1; }",
-        ".clue-text { font-family: Arial,; font-size: 12px; fill: #000; }",
-        ".solution { font-family: Arial; font-size: 24px; fill: #000; text-anchor: middle; dominant-baseline: middle; }",
-        "</style>",
-    ]
-
-    # Draw cells
-    for i in range(rows):
-        for j in range(cols):
-            x = i * cell_size
-            y = j * cell_size
-
-            if clue := puzzle.get_clue(i, j):
-                if clue.is_wall:
-                    svg_lines.append(
-                        f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="wall"/>'
-                    )
-                    svg_lines.append(
-                        f'<line x1="{x}" y1="{y}" x2="{x+cell_size}" y2="{y+cell_size}" class="grid-line"/>'
-                    )
-
-                    if row_sum := clue.row_sum:
-                        svg_lines.append(
-                            f'<text x="{x+cell_size-20}" y="{y+20}" class="clue-text">{row_sum}</text>'
-                        )
-                    if col_sum := clue.col_sum:
-                        svg_lines.append(
-                            f'<text x="{x+10}" y="{y+cell_size-10}" class="clue-text">{col_sum}</text>'
-                        )
-                elif value := clue.value:
-                    svg_lines.append(
-                        f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="blank"/>'
-                    )
-                    svg_lines.append(
-                        f'<text x="{x+cell_size/2}" y="{y+cell_size/2}" class="solution">{value}</text>'
-                    )
-            else:
-                svg_lines.append(
-                    f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="blank"/>'
-                )
-                if show_solution and solution and solution[i][j] != 0:
-                    svg_lines.append(
-                        f'<text x="{x+cell_size/2}" y="{y+cell_size/2}" class="solution">{solution[i][j]}</text>'
-                    )
-
-    svg_lines.append("</svg>")
-    return "\n".join(svg_lines)
 
 
 def main() -> None:
@@ -188,42 +80,32 @@ def main() -> None:
     parser.add_argument(
         "--input", "-i", type=Path, required=True, help="Input puzzle file (JSON)"
     )
-    parser.add_argument("--output", "-o", type=Path, required=True, help="Output file")
-    parser.add_argument(
-        "--mode",
-        choices=["show", "solve"],
-        default="solve",
-        help="Mode of operation",
-    )
+    parser.add_argument("--output", "-o", type=Path, help="Output file")
     args = parser.parse_args()
 
-    with open(args.input, "r") as f:
+    input_file = args.input
+
+    with open(input_file, "r") as f:
         puzzle_data = json.load(f)
+
     puzzle = KakuroPuzzle(puzzle_data["size"], puzzle_data["cells"])
 
-    if args.mode == "show":
-        output = create_svg(puzzle, show_solution=False)
-    elif args.mode == "solve":
-        solution = solve_kakuro(puzzle)
-        if solution is None:
-            print("No solution exists")
-            return
-        if args.output.suffix == ".svg":
-            output = create_svg(puzzle, solution)
-        else:
-            solution_cells = [
-                {"x": x, "y": y, "value": value}
-                for x, row in enumerate(solution)
-                for y, value in enumerate(row)
-                if value > 0
-            ]
-            solution_data = {
-                "size": puzzle.size,
-                "cells": puzzle_data["cells"] + solution_cells,
-            }
-            output = json.dumps(solution_data)
+    solution = solve_kakuro(puzzle)
+    if solution is None:
+        print("No solution exists")
+        return
 
-    args.output.write_text(output)
+    solution_data = {
+        "size": puzzle.size,
+        "cells": puzzle_data["cells"],
+        "solution_cells": [cell.__dict__ for cell in solution],
+    }
+
+    output_file = args.output or input_file.with_stem(
+        input_file.stem + "_sol"
+    ).with_suffix(".json")
+    print(f"Writing solution to {output_file}")
+    output_file.write_text(json.dumps(solution_data))
 
 
 if __name__ == "__main__":
