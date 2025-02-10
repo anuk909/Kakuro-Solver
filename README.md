@@ -32,11 +32,17 @@ Z3 is a high-performance theorem prover developed by Microsoft Research. It is u
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/yourusername/kakuro-solver.git
+   git clone https://github.com/anuk909/kakuro-solver.git
    cd kakuro-solver
    ```
 
-2. Install the required dependencies:
+2. Create and activate a virtual environment:
+  ```sh
+  python3.11 -m venv venv
+  source venv/bin/activate  # On Windows: venv\Scripts\activate
+  ```
+
+3. Install the required dependencies:
 
    ```sh
    pip install -r requirements.txt
