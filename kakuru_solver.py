@@ -11,25 +11,31 @@ Solution: TypeAlias = list[list[int]]
 
 
 @dataclass
-class KakuroCell:
+class ClueCell:
     x: int
     y: int
     row_sum: int | None
     col_sum: int | None
     is_wall: bool
+    value: int | None
 
 
 class KakuroPuzzle:
     def __init__(self, size, cells):
         self.size: tuple[int, int] = size
-        self.board: dict[Cell, KakuroCell] = {}
+        self.board: dict[Cell, ClueCell] = {}
         for cell in cells:
             x, y = cell["x"], cell["y"]
-            row_sum = cell.get("right")
-            col_sum = cell.get("down")
+            row_sum = cell.get("row_sum")
+            col_sum = cell.get("col_sum")
+            # Support writing wall explicit or implicit
             is_wall = cell.get("wall") or row_sum or col_sum
-            if is_wall:
-                self.board[(x, y)] = KakuroCell(x, y, row_sum, col_sum, is_wall)
+            value = cell.get("value")
+            if value:
+                assert not is_wall, "Cell cannot be both wall and value"
+                assert value in range(1, 10), "Value must be between 1 and 9"
+            if is_wall or value:
+                self.board[(x, y)] = ClueCell(x, y, row_sum, col_sum, is_wall, value)
 
     @property
     def clues(self):
@@ -39,7 +45,7 @@ class KakuroPuzzle:
         cell = self.board.get((row, col))
         return cell and cell.is_wall
 
-    def get_clue(self, row: int, col: int) -> KakuroCell | None:
+    def get_clue(self, row: int, col: int) -> ClueCell | None:
         return self.board.get((row, col))
 
 
@@ -75,8 +81,11 @@ def solve_kakuro(puzzle: KakuroPuzzle) -> Solution | None:
     # Add basic constraints
     for i in range(rows):
         for j in range(cols):
-            if puzzle.is_wall(i, j):
-                solver.add(grid[i][j] == 0)
+            if clue := puzzle.get_clue(i, j):
+                if puzzle.is_wall:
+                    solver.add(grid[i][j] == 0)
+                elif value := puzzle.value:
+                    solver.add(grid[i][j] == value)
             else:
                 solver.add(grid[i][j] >= 1)
                 solver.add(grid[i][j] <= 9)
@@ -124,7 +133,6 @@ def create_svg(
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" style="background-color: white;">',
         "<style>",
         ".grid-line { stroke: #000; stroke-width: 1; }",
-        ".wall { fill: #808080; stroke: #000; stroke-width: 1; }",
         ".clue { fill: #808080; stroke: #000; stroke-width: 1; }",
         ".blank { fill: #ffffff; stroke: #000; stroke-width: 1; }",
         ".clue-text { font-family: Arial,; font-size: 12px; fill: #000; }",
@@ -139,26 +147,26 @@ def create_svg(
             y = j * cell_size
 
             if clue := puzzle.get_clue(i, j):
-                row_sum, col_sum = clue.row_sum, clue.col_sum
                 svg_lines.append(
                     f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="clue"/>'
                 )
-                svg_lines.append(
-                    f'<line x1="{x}" y1="{y}" x2="{x+cell_size}" y2="{y+cell_size}" class="grid-line"/>'
-                )
+                if clue.is_wall:
+                    svg_lines.append(
+                        f'<line x1="{x}" y1="{y}" x2="{x+cell_size}" y2="{y+cell_size}" class="grid-line"/>'
+                    )
 
-                if row_sum is not None:
+                    if row_sum := clue.row_sum:
+                        svg_lines.append(
+                            f'<text x="{x+cell_size-20}" y="{y+20}" class="clue-text">{row_sum}</text>'
+                        )
+                    if col_sum := clue.col_sum:
+                        svg_lines.append(
+                            f'<text x="{x+10}" y="{y+cell_size-10}" class="clue-text">{col_sum}</text>'
+                        )
+                elif value := clue.value:
                     svg_lines.append(
-                        f'<text x="{x+cell_size-20}" y="{y+20}" class="clue-text">{row_sum}</text>'
+                        f'<text x="{x+cell_size/2}" y="{y+cell_size/2}" class="solution">{value}</text>'
                     )
-                if col_sum is not None:
-                    svg_lines.append(
-                        f'<text x="{x+10}" y="{y+cell_size-10}" class="clue-text">{col_sum}</text>'
-                    )
-            elif puzzle.is_wall(i, j):
-                svg_lines.append(
-                    f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="wall"/>'
-                )
             else:
                 svg_lines.append(
                     f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="blank"/>'
