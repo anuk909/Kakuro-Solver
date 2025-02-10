@@ -220,9 +220,31 @@ def save_puzzle(puzzle: Dict, size: str, difficulty: str, puzzle_id: int):
             break
         counter += 1
     
-    # Save with compact JSON formatting
+    # Save with readable compact JSON formatting
+    def format_cells(cells):
+        lines = []
+        for cell in cells:
+            parts = [f'"x": {cell["x"]}, "y": {cell["y"]}']
+            if "wall" in cell:
+                parts.append('"wall": true')
+            if "right" in cell:
+                parts.append(f'"right": {cell["right"]}')
+            if "down" in cell:
+                parts.append(f'"down": {cell["down"]}')
+            if "value" in cell:
+                parts.append(f'"value": {cell["value"]}')
+            lines.append('    { ' + ', '.join(parts) + ' }')
+        return ',\n'.join(lines)
+    
     with open(filename, 'w') as f:
-        json.dump(puzzle, f, separators=(',', ':'))
+        f.write('{\n')
+        f.write('  "size": [%d, %d],\n' % tuple(puzzle["size"]))
+        if "url" in puzzle:
+            f.write('  "url": "%s",\n' % puzzle["url"])
+        f.write('  "cells": [\n')
+        f.write(format_cells(puzzle["cells"]))
+        f.write('\n  ]\n')
+        f.write('}\n')
     
     print(f"Saved puzzle to {filename}")
 
