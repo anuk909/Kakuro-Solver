@@ -1,15 +1,14 @@
 # Kakuro Solver
 
-This project provides a Kakuro puzzle solver using the Z3 SMT solver. \
-The solver can read a Kakuro puzzle from a JSON file, solve it, and output the solution in either JSON or SVG format.
+This project provides a Kakuro puzzle solver and visualizer using the Z3 SMT solver. The solver can read a Kakuro puzzle from a JSON file, solve it, and output the solution in either JSON or SVG format. The visualizer can display the puzzle and its solution in SVG format.
 
 ## What is Kakuro?
 
 Kakuro is a logic-based number puzzle that is often referred to as a mathematical crossword. The objective is to fill all of the blank squares in the grid with digits from 1 to 9 such that the sum of the numbers in each horizontal and vertical block matches the clue associated with that block. Additionally, no number may be used more than once in any block. For more information, you can visit [Wikipedia](https://en.wikipedia.org/wiki/Kakuro).
 
-Kakuro puzzles comes in all shapes and sizes, this is an example for simple kakuro of 5x5:
+Kakuro puzzles come in all shapes and sizes. This is an example of a simple Kakuro of 5x5:
 
-<img src="examples/raw_puzzle_image.png" width="300">
+<img src="examples/5_5_kakuro.png" width="300">
 
 ## What is Z3?
 
@@ -19,8 +18,7 @@ Z3 is a high-performance theorem prover developed by Microsoft Research. It is u
 
 - Read Kakuro puzzles from JSON files.
 - Solve Kakuro puzzles using the Z3 SMT solver.
-- Output solutions in JSON or SVG format.
-- Display puzzles without solving them.
+- Visualize puzzles and solutions in SVG format.
 
 ## Requirements
 
@@ -37,10 +35,11 @@ Z3 is a high-performance theorem prover developed by Microsoft Research. It is u
    ```
 
 2. Create and activate a virtual environment:
-  ```sh
-  python3.11 -m venv venv
-  source venv/bin/activate  # On Windows: venv\Scripts\activate
-  ```
+
+   ```sh
+   python3.11 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
 3. Install the required dependencies:
 
@@ -52,41 +51,52 @@ Z3 is a high-performance theorem prover developed by Microsoft Research. It is u
 
 ### Command Line Interface
 
-The solver can be used via the command line. The following options are available:
+The solver and visualizer can be used via the command line. The following options are available:
 
 - `--input` or `-i`: Path to the input JSON file containing the Kakuro puzzle.
 - `--output` or `-o`: Path to the output file where the solution will be saved (output format deduced by suffix).
-- `--mode`: Mode of operation, either `show` to display the puzzle or `solve` to solve it (default: `solve`).
 
-### Examples
+### Solver
 
 To solve a Kakuro puzzle and save the solution as an SVG file:
 
 ```sh
-python kakuro_solver.py --input examples/puzzle.json --output examples/solution.svg --mode solve
+python kakuro_solver.py --input examples/puzzle.json
 ```
 
 **SVG Output:**
 
 <img src="examples/solution.svg" width="300">
 
-To solve a Kakuro puzzle and save the solution as a json file:
+To solve a Kakuro puzzle and save the solution as a JSON file:
 
 ```sh
-python kakuro_solver.py --input examples/puzzle.json --output examples/solution.json --mode solve
+python kakuro_solver.py --input examples/puzzle.json
 ```
 
-To display a Kakuro puzzle without solving it:
+### Visualizer
+
+To display a Kakuro puzzle as an SVG file:
 
 ```sh
-python kakuro_solver.py --input examples/puzzle.json --output examples/puzzle.svg --mode show
+python kakuro_visualizer.py --input examples/puzzle.json
 ```
 
 **SVG Output:**
 
 <img src="examples/puzzle.svg" width="300">
 
-#### Input JSON Format
+To display a Kakuro puzzle and its solution as an SVG file:
+
+```sh
+python kakuro_visualizer.py --input examples/puzzle_sol.json
+```
+
+**SVG Output:**
+
+<img src="examples/puzzle_sol.svg" width="300">
+
+#### JSON Format
 
 The input JSON file should have the following structure:
 
@@ -97,15 +107,33 @@ The input JSON file should have the following structure:
     { "x": row, "y": column, "wall": true },
     { "x": row, "y": column, "right": sum },
     { "x": row, "y": column, "down": sum },
-    { "x": row, "y": column, "value": value }
+    { "x": row, "y": column, "right", "down": sum },
+  ]
+}
+```
+
+The output JSON file should have the following structure:
+
+```
+{
+  "size": [number_of_rows, number_of_columns],
+  "cells": [
+    { "x": row, "y": column, "wall": true },
+    { "x": row, "y": column, "right": sum },
+    { "x": row, "y": column, "down": sum },
+    { "x": row, "y": column, "right", "down": sum },
+  ],
+  solution_cells: [
+    {"x": row, "y": column, "value": true}
   ]
 }
 ```
 
 - `size`: A list containing the number of rows and columns of the puzzle.
-- `cells`: A list of cell definitions. Each cell can be a wall, a clue cell with a sum, or a pre-filled cell with a value. The value key is used for the JSON output too.
+- `cells`: A list of cell definitions. Each cell can be a wall or a clue cell with a sum.
+- `solution_cells`: A list of all the solution cells values.
 
-You can see full input files examples in [examples/puzzle.json](examples/puzzle.json) and [examples/harder_puzzle.json](examples/harder_puzzle.json)
+You can see full files examples in [examples/puzzle.json](examples/puzzle.json), [examples/harder_puzzle.json](examples/harder_puzzle.json) and [examples/puzzle_sol.json](examples/puzzle_sol.json).
 
 ## Contact
 
