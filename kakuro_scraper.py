@@ -217,9 +217,6 @@ def parse_cell(cell: BeautifulSoup, x: int, y: int) -> Optional[Dict]:
 
 def save_puzzle(puzzle: Dict, size: str, difficulty: str, puzzle_id: int, puzzle_url: str):
     """Save puzzle to JSON file with compact formatting."""
-    # Ensure cells are sorted correctly: wall, clue (right/down), solution
-    puzzle["cells"] = sort_cells(puzzle["cells"])
-    
     # Add URL to puzzle data
     puzzle["url"] = puzzle_url
     
@@ -229,13 +226,24 @@ def save_puzzle(puzzle: Dict, size: str, difficulty: str, puzzle_id: int, puzzle
     # Use puzzle ID in filename to avoid duplicates
     filename = f"kakuroconquest/{size}_{difficulty}_{puzzle_id}.json"
     
-    # Sort cells to maintain consistent order
+    # Sort cells and maintain property order
     sorted_cells = []
-    for cell in puzzle["cells"]:
+    for cell in sort_cells(puzzle["cells"]):
         ordered = {}
         # Order: x, y, wall, right, down, value
         for key in ["x", "y", "wall", "right", "down", "value"]:
             if key in cell:
+                ordered[key] = cell[key]
+        sorted_cells.append(ordered)
+    
+    puzzle["cells"] = sorted_cells
+    
+    # Use standard json module with proper indentation
+    with open(filename, 'w') as f:
+        json.dump(puzzle, f, indent=2)
+        f.write('\n')
+    
+    print(f"Saved puzzle to {filename}")
                 ordered[key] = cell[key]
         sorted_cells.append(ordered)
     
