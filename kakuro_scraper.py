@@ -9,71 +9,65 @@ from typing import Dict, List, Optional, Tuple
 import re
 from common import validate_puzzle_data
 
-def solve_puzzle(size: str, difficulty: str, puzzle_id: int) -> None:
-    """Submit a solution to get the values."""
+def solve_puzzle(size: str, difficulty: str, puzzle_id: int) -> Dict[str, int]:
+    """Submit solution request and parse response."""
     base_url = "https://www.kakuroconquest.com"
     url = f"{base_url}/{size}/{difficulty}/{puzzle_id}"
     
     try:
-        print(f"Fetching puzzle from {url}...")
-        # First get the puzzle page to find solution link
+        # Get puzzle page to find solution form
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         
-        # Parse puzzle page for solution button/link
+        # Parse form and submit solution request
         soup = BeautifulSoup(response.text, 'html.parser')
-        solution_links = []
-        for a in soup.find_all('a'):
-            if not isinstance(a, Tag):
-                continue
-            href = a.get('href')
-            if isinstance(href, str) and 'solution' in href:
-                solution_links.append(a)
-                
-        if not solution_links:
-            print("Warning: No solution link found")
-            print("Available links:", [a.get('href') for a in soup.find_all('a') if isinstance(a, Tag)])
-            raise ValueError("No solution link found")
+        form = soup.find('form', {'name': 'puzzle'})
+        if not isinstance(form, Tag):
+            raise ValueError("No puzzle form found")
             
-        href = solution_links[0].get('href')
-        if not isinstance(href, str):
-            raise ValueError("Invalid solution URL")
-            
-        solution_url = href if href.startswith('http') else f"{base_url}{href}"
-            
-        print(f"Fetching solution from {solution_url}...")
-        response = requests.get(solution_url, timeout=10)
-        response.raise_for_status()
-        
-        # Parse solution page
-        soup = BeautifulSoup(response.text, 'html.parser')
-        data = {}
-        for input_field in soup.find_all('input'):
+        # Extract solution values
+        solution_data = {}
+        for input_field in form.find_all('input'):
             if not isinstance(input_field, Tag):
                 continue
-                
+            name = input_field.get('name')
+            if isinstance(name, str) and name.startswith('cell_'):
+                solution_data[name] = ''  # Empty value to request solution
+        
+        if not solution_data:
+            raise ValueError("No input cells found in puzzle form")
+            
+        # Submit form to get solution
+        print(f"Requesting solution for puzzle {puzzle_id}...")
+        response = requests.post(url, data=solution_data, timeout=10)
+        response.raise_for_status()
+        
+        # Parse solution from response
+        soup = BeautifulSoup(response.text, 'html.parser')
+        form = soup.find('form', {'name': 'puzzle'})
+        if not isinstance(form, Tag):
+            raise ValueError("No solution form found in response")
+            
+        # Extract solution values
+        solution_values = {}
+        for input_field in form.find_all('input'):
+            if not isinstance(input_field, Tag):
+                continue
             name = input_field.get('name')
             value = input_field.get('value')
-            
-            if name and isinstance(name, str) and name.startswith('cell_'):
-                if value and isinstance(value, str) and value.strip().isdigit():
-                    data[name] = value.strip()
-                    print(f"Found value {value} for {name}")
+            if (isinstance(name, str) and name.startswith('cell_') and 
+                isinstance(value, str) and value.strip().isdigit()):
+                solution_values[name] = int(value.strip())
         
-        if not data:
-            print("Warning: No solution values found in response")
-            print("Response content:", response.text[:200])  # Print first 200 chars for debugging
-            raise ValueError("No solution values found")
+        if not solution_values:
+            raise ValueError("No solution values found in response")
             
-        # Submit solution
-        print(f"Submitting solution with {len(data)} values...")
-        response = requests.post(url, data=data, timeout=10)
-        response.raise_for_status()
-        time.sleep(1)  # Wait for solution to be applied
+        return solution_values
+        
     except requests.Timeout:
         raise ValueError(f"Request timed out for {url}")
     except requests.RequestException as e:
-        raise ValueError(f"Failed to fetch/submit solution: {e}")
+        raise ValueError(f"Failed to get solution: {e}")
 
 def get_puzzle_page(size: str, difficulty: str, puzzle_id: Optional[int] = None) -> str:
     """Get puzzle page HTML with rate limiting."""
@@ -151,12 +145,14 @@ def parse_puzzle(html: str) -> Dict:
     if not first_row_cells:
         raise ValueError("No valid cells found in first row")
         
-    size = [len(rows), len(first_row_cells)]
+    height = len(rows)
+    width = len(first_row_cells)
+    size = [width, height]  # x = width, y = height
     
-    # Parse cells
+    # Parse cells using y,x coordinates to match example format
     cells = []
-    for x, row in enumerate(rows):
-        for y, cell in enumerate(row.find_all('td')):
+    for y, row in enumerate(rows):
+        for x, cell in enumerate(row.find_all('td')):
             # Skip spacer cells
             if cell.get('class') == 'spacer':
                 continue
@@ -165,7 +161,7 @@ def parse_puzzle(html: str) -> Dict:
             if cell_data:
                 cells.append(cell_data)
     
-    # Sort cells in correct order
+    # Sort cells in correct order: wall, clue (right/down), solution
     cells = sort_cells(cells)
     
     return {
@@ -175,43 +171,43 @@ def parse_puzzle(html: str) -> Dict:
 
 def parse_cell(cell: BeautifulSoup, x: int, y: int) -> Optional[Dict]:
     """Parse individual cell into JSON format."""
-    cell_data = {"x": x, "y": y}
+    # Only include non-empty cells
+    input_field = cell.find('input')
+    divs = cell.find_all('div', string=re.compile(r'\d+'))
     
-    # Check if it's a wall cell (no input field and no sums)
-    if not cell.find('input') and not cell.find_all('div', string=re.compile(r'\d+')):
+    # Empty cell (not wall, no clues)
+    if input_field and not divs:
+        return None
+        
+    # Wall cell (no input, no clues)
+    if not input_field and not divs:
         return {"x": x, "y": y, "wall": True}
     
-    # Find sum values in divs
-    divs = cell.find_all('div', string=re.compile(r'\d+'))
-    if not divs:
-        # Check for solution value
-        input_field = cell.find('input')
-        if isinstance(input_field, Tag):
-            value_str = input_field.get('value')
-            if value_str and isinstance(value_str, str):
-                try:
-                    value = int(value_str.strip())
-                    if 1 <= value <= 9:  # Only include valid values
-                        return {"x": x, "y": y, "value": value}
-                except (ValueError, TypeError):
-                    pass
-        return None  # Empty cell or invalid value
-        
-    # Parse sums - first div is usually right sum, second is down sum
-    for i, div in enumerate(divs):
+    cell_data = {"x": x, "y": y}
+    
+    # Parse clue values
+    for div in divs:
         try:
             value = int(div.text.strip())
-            if i == 0 and len(divs) == 1:  # Single sum - check position
-                if div.get('style', '').find('border-left') >= 0:
-                    cell_data["right"] = value
-                else:
-                    cell_data["down"] = value
-            elif i == 0:  # First of multiple sums
+            # Check div style for right/down clue
+            style = div.get('style', '')
+            if 'border-left' in style:
                 cell_data["right"] = value
-            else:  # Second sum
+            else:
                 cell_data["down"] = value
         except ValueError:
             continue
+            
+    # Check for solution value
+    if input_field and isinstance(input_field, Tag):
+        value_str = input_field.get('value')
+        if value_str and isinstance(value_str, str):
+            try:
+                value = int(value_str.strip())
+                if 1 <= value <= 9:  # Only include valid values
+                    cell_data["value"] = value
+            except (ValueError, TypeError):
+                pass
     
     return cell_data if len(cell_data) > 2 else None
 
@@ -238,9 +234,26 @@ def save_puzzle(puzzle: Dict, size: str, difficulty: str, puzzle_id: int, puzzle
     
     puzzle["cells"] = sorted_cells
     
-    # Use standard json module with proper indentation
+    # Format JSON with proper indentation and array style
+    class KakuroJSONEncoder(json.JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj, dict):
+                # Maintain specific order for cell properties
+                if all(k in ["x", "y", "wall", "right", "down", "value"] for k in obj.keys()):
+                    ordered = {}
+                    for key in ["x", "y", "wall", "right", "down", "value"]:
+                        if key in obj:
+                            ordered[key] = obj[key]
+                    return ordered
+            return super().default(obj)
+    
+    # Format JSON with proper indentation and array style
+    formatted_json = json.dumps(puzzle, indent=2, cls=KakuroJSONEncoder)
+    # Fix array formatting to be on one line
+    formatted_json = re.sub(r'\[\n\s+(\d+),\n\s+(\d+)\n\s+\]', r'[\1, \2]', formatted_json)
+    
     with open(filename, 'w') as f:
-        json.dump(puzzle, f, indent=2)
+        f.write(formatted_json)
         f.write('\n')
     
     print(f"Saved puzzle to {filename}")
