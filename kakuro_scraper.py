@@ -226,36 +226,25 @@ def save_puzzle(puzzle: Dict, size: str, difficulty: str, puzzle_id: int, puzzle
     # Create kakuroconquest directory if it doesn't exist
     os.makedirs("kakuroconquest", exist_ok=True)
     
-    # Find next available filename
-    base_filename = f"kakuroconquest/{size}_{difficulty}"
-    counter = 1
-    while True:
-        filename = f"{base_filename}_{counter}.json" if counter > 1 else f"{base_filename}.json"
-        if not os.path.exists(filename):
-            break
-        counter += 1
+    # Use puzzle ID in filename to avoid duplicates
+    filename = f"kakuroconquest/{size}_{difficulty}_{puzzle_id}.json"
     
-    # Custom JSON encoder to maintain property order and format
-    class KakuroJSONEncoder(json.JSONEncoder):
-        def default(self, obj):
-            if isinstance(obj, dict):
-                # Maintain specific order for cell properties
-                if all(k in ["x", "y", "wall", "right", "down", "value"] for k in obj.keys()):
-                    ordered = {}
-                    # Order: x, y, wall, right, down, value
-                    for key in ["x", "y", "wall", "right", "down", "value"]:
-                        if key in obj:
-                            ordered[key] = obj[key]
-                    return ordered
-            return super().default(obj)
-
-    # Format JSON with custom indentation
-    formatted_json = json.dumps(puzzle, indent=2, cls=KakuroJSONEncoder)
-    # Fix the array formatting to be on one line
-    formatted_json = re.sub(r'\[\n\s+(\d+),\n\s+(\d+)\n\s+\]', r'[\1, \2]', formatted_json)
+    # Sort cells to maintain consistent order
+    sorted_cells = []
+    for cell in puzzle["cells"]:
+        ordered = {}
+        # Order: x, y, wall, right, down, value
+        for key in ["x", "y", "wall", "right", "down", "value"]:
+            if key in cell:
+                ordered[key] = cell[key]
+        sorted_cells.append(ordered)
     
+    puzzle["cells"] = sorted_cells
+    
+    # Use standard json module with proper indentation
     with open(filename, 'w') as f:
-        f.write(formatted_json + '\n')
+        json.dump(puzzle, f, indent=2)
+        f.write('\n')
     
     print(f"Saved puzzle to {filename}")
 
