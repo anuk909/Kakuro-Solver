@@ -64,7 +64,7 @@ To solve a Kakuro puzzle and save the solution as a JSON file:
 python kakuro_solver.py --input examples/puzzle.json
 ```
 
-If the puzzle is solvable examples/puzzle_sol.json will have data data in the input + the key `solution_cells`.
+If the puzzle is solvable, `examples/puzzle_sol.json` will have the input data + `solution_cells`.
 
 ### Visualizer
 
