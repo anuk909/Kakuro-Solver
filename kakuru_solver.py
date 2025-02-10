@@ -133,7 +133,7 @@ def create_svg(
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" style="background-color: white;">',
         "<style>",
         ".grid-line { stroke: #000; stroke-width: 1; }",
-        ".clue { fill: #c0c0c0; stroke: #000; stroke-width: 1; }",
+        ".wall { fill: #c0c0c0; stroke: #000; stroke-width: 1; }",
         ".blank { fill: #ffffff; stroke: #000; stroke-width: 1; }",
         ".clue-text { font-family: Arial,; font-size: 12px; fill: #000; }",
         ".solution { font-family: Arial; font-size: 24px; fill: #000; text-anchor: middle; dominant-baseline: middle; }",
@@ -149,7 +149,7 @@ def create_svg(
             if clue := puzzle.get_clue(i, j):
                 if clue.is_wall:
                     svg_lines.append(
-                        f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="clue"/>'
+                        f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="wall"/>'
                     )
                     svg_lines.append(
                         f'<line x1="{x}" y1="{y}" x2="{x+cell_size}" y2="{y+cell_size}" class="grid-line"/>'
