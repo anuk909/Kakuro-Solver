@@ -110,11 +110,10 @@ def parse_cell(cell: BeautifulSoup, x: int, y: int) -> dict | None:
                     cell_data["down"] = value
             elif i == 0:  # First of multiple sums
                 cell_data["right"] = value
-            else:  # Second sum
+            else:
                 cell_data["down"] = value
         except ValueError:
             continue
-
     return cell_data if len(cell_data) > 2 else None
 
 
