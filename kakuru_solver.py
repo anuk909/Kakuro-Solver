@@ -147,10 +147,10 @@ def create_svg(
             y = j * cell_size
 
             if clue := puzzle.get_clue(i, j):
-                svg_lines.append(
-                    f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="clue"/>'
-                )
                 if clue.is_wall:
+                    svg_lines.append(
+                        f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="clue"/>'
+                    )
                     svg_lines.append(
                         f'<line x1="{x}" y1="{y}" x2="{x+cell_size}" y2="{y+cell_size}" class="grid-line"/>'
                     )
@@ -164,6 +164,9 @@ def create_svg(
                             f'<text x="{x+10}" y="{y+cell_size-10}" class="clue-text">{col_sum}</text>'
                         )
                 elif value := clue.value:
+                    svg_lines.append(
+                        f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="blank"/>'
+                    )
                     svg_lines.append(
                         f'<text x="{x+cell_size/2}" y="{y+cell_size/2}" class="solution">{value}</text>'
                     )
@@ -205,7 +208,20 @@ def main() -> None:
         if solution is None:
             print("No solution exists")
             return
-        output = create_svg(puzzle, solution)
+        if args.output.suffix == ".svg":
+            output = create_svg(puzzle, solution)
+        else:
+            solution_cells = [
+                {"x": x, "y": y, "value": value}
+                for x, row in enumerate(solution)
+                for y, value in enumerate(row)
+                if value > 0
+            ]
+            solution_data = {
+                "size": puzzle.size,
+                "cells": puzzle_data["cells"] + solution_cells,
+            }
+            output = json.dumps(solution_data)
 
     args.output.write_text(output)
 
