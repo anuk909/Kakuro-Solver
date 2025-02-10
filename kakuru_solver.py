@@ -7,28 +7,40 @@ from pathlib import Path
 
 # Type definitions
 Cell = tuple[int, int]  # (row, col)
-ClueCell = tuple[
-    int, int, Optional[int], Optional[int]
-]  # (row, col, down_sum, right_sum)
 Solution: TypeAlias = list[list[int]]
-Z3Int = z3.ArithRef
 
 
 @dataclass
+class KakuroCell:
+    x: int
+    y: int
+    row_sum: int | None
+    col_sum: int | None
+    is_wall: bool
+
+
 class KakuroPuzzle:
-    size: tuple[int, int]  # (rows, cols)
-    walls: list[Cell]  # List of wall coordinates
-    clues: list[ClueCell]  # List of clue cells with their sums
+    def __init__(self, size, cells):
+        self.size: tuple[int, int] = size
+        self.board: dict[Cell, KakuroCell] = {}
+        for cell in cells:
+            x, y = cell["x"], cell["y"]
+            row_sum = cell.get("right")
+            col_sum = cell.get("down")
+            is_wall = cell.get("wall") or row_sum or col_sum
+            if is_wall:
+                self.board[(x, y)] = KakuroCell(x, y, row_sum, col_sum, is_wall)
+
+    @property
+    def clues(self):
+        return self.board.values()
 
     def is_wall(self, row: int, col: int) -> bool:
-        return (row, col) in self.walls
+        cell = self.board.get((row, col))
+        return cell and cell.is_wall
 
-    def get_clue(self, row: int, col: int) -> tuple[int | None, int | None] | None:
-        """Returns (down_sum, right_sum) for clue cells, None otherwise"""
-        for r, c, down, right in self.clues:
-            if r == row and c == col:
-                return (down, right)
-        return None
+    def get_clue(self, row: int, col: int) -> KakuroCell | None:
+        return self.board.get((row, col))
 
 
 def get_sum_run(
@@ -40,12 +52,12 @@ def get_sum_run(
 
     if direction == "right":
         for x in range(first_x + 1, cols):
-            if puzzle.is_wall(x, first_y) or puzzle.get_clue(x, first_y):
+            if puzzle.is_wall(x, first_y):
                 break
             cells.append((x, first_y))
     else:
         for y in range(first_y + 1, rows):
-            if puzzle.is_wall(first_x, y) or puzzle.get_clue(first_x, y):
+            if puzzle.is_wall(first_x, y):
                 break
             cells.append((first_x, y))
 
@@ -63,28 +75,29 @@ def solve_kakuro(puzzle: KakuroPuzzle) -> Solution | None:
     # Add basic constraints
     for i in range(rows):
         for j in range(cols):
-            if puzzle.is_wall(i, j) or puzzle.get_clue(i, j):
+            if puzzle.is_wall(i, j):
                 solver.add(grid[i][j] == 0)
             else:
                 solver.add(grid[i][j] >= 1)
                 solver.add(grid[i][j] <= 9)
 
     # Add sum constraints
-    for x, y, down_sum, right_sum in puzzle.clues:
+    for clue in puzzle.clues:
+        x, y, row_sum, col_sum = clue.x, clue.y, clue.row_sum, clue.col_sum
         # Add right sum constraint
-        if right_sum is not None:
+        if row_sum is not None:
             _, right_cells = get_sum_run(puzzle, x, y, "right")
             if right_cells:
                 cell_vars = [grid[r][c] for r, c in right_cells]
-                solver.add(Sum(cell_vars) == right_sum)
+                solver.add(Sum(cell_vars) == row_sum)
                 solver.add(Distinct(cell_vars))
 
         # Add down sum constraint
-        if down_sum is not None:
+        if col_sum is not None:
             _, down_cells = get_sum_run(puzzle, x, y, "down")
             if down_cells:
                 cell_vars = [grid[r][c] for r, c in down_cells]
-                solver.add(Sum(cell_vars) == down_sum)
+                solver.add(Sum(cell_vars) == col_sum)
                 solver.add(Distinct(cell_vars))
 
     if solver.check() == sat:
@@ -111,9 +124,10 @@ def create_svg(
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" style="background-color: white;">',
         "<style>",
         ".grid-line { stroke: #000; stroke-width: 1; }",
-        ".wall { fill: #666; stroke: #000; stroke-width: 1; }",
-        ".clue { fill: #f0f0f0; stroke: #000; stroke-width: 1; }",
-        ".clue-text { font-family: Arial; font-size: 12px; fill: #000; }",
+        ".wall { fill: #808080; stroke: #000; stroke-width: 1; }",
+        ".clue { fill: #808080; stroke: #000; stroke-width: 1; }",
+        ".blank { fill: #ffffff; stroke: #000; stroke-width: 1; }",
+        ".clue-text { font-family: Arial,; font-size: 12px; fill: #000; }",
         ".solution { font-family: Arial; font-size: 24px; fill: #000; text-anchor: middle; dominant-baseline: middle; }",
         "</style>",
     ]
@@ -124,12 +138,8 @@ def create_svg(
             x = i * cell_size
             y = j * cell_size
 
-            if puzzle.is_wall(i, j):
-                svg_lines.append(
-                    f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="wall"/>'
-                )
-            elif clue := puzzle.get_clue(i, j):
-                down_sum, right_sum = clue
+            if clue := puzzle.get_clue(i, j):
+                row_sum, col_sum = clue.row_sum, clue.col_sum
                 svg_lines.append(
                     f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="clue"/>'
                 )
@@ -137,17 +147,21 @@ def create_svg(
                     f'<line x1="{x}" y1="{y}" x2="{x+cell_size}" y2="{y+cell_size}" class="grid-line"/>'
                 )
 
-                if down_sum is not None:
+                if row_sum is not None:
                     svg_lines.append(
-                        f'<text x="{x+10}" y="{y+cell_size-10}" class="clue-text">{down_sum}</text>'
+                        f'<text x="{x+cell_size-20}" y="{y+20}" class="clue-text">{row_sum}</text>'
                     )
-                if right_sum is not None:
+                if col_sum is not None:
                     svg_lines.append(
-                        f'<text x="{x+cell_size-20}" y="{y+20}" class="clue-text">{right_sum}</text>'
+                        f'<text x="{x+10}" y="{y+cell_size-10}" class="clue-text">{col_sum}</text>'
                     )
+            elif puzzle.is_wall(i, j):
+                svg_lines.append(
+                    f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="wall"/>'
+                )
             else:
                 svg_lines.append(
-                    f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" fill="white" stroke="black"/>'
+                    f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="blank"/>'
                 )
                 if show_solution and solution and solution[i][j] != 0:
                     svg_lines.append(
@@ -156,27 +170,6 @@ def create_svg(
 
     svg_lines.append("</svg>")
     return "\n".join(svg_lines)
-
-
-def load_puzzle(file_path: Path) -> KakuroPuzzle:
-    """Load puzzle from JSON file"""
-    data = json.loads(file_path.read_text())
-
-    # Extract size
-    size = tuple(data["size"])
-
-    # Extract walls and clues
-    walls = []
-    clues = []
-
-    for cell in data["cells"]:
-        x, y = cell["x"], cell["y"]
-        if "wall" in cell and cell["wall"]:
-            walls.append((x, y))
-        elif "down" in cell or "right" in cell:
-            clues.append((x, y, cell.get("down"), cell.get("right")))
-
-    return KakuroPuzzle(size=size, walls=walls, clues=clues)
 
 
 def main() -> None:
@@ -193,7 +186,9 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    puzzle = load_puzzle(args.input)
+    with open(args.input, "r") as f:
+        puzzle_data = json.load(f)
+    puzzle = KakuroPuzzle(puzzle_data["size"], puzzle_data["cells"])
 
     if args.mode == "show":
         output = create_svg(puzzle, show_solution=False)
