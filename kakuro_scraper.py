@@ -244,17 +244,6 @@ def save_puzzle(puzzle: Dict, size: str, difficulty: str, puzzle_id: int, puzzle
         f.write('\n')
     
     print(f"Saved puzzle to {filename}")
-                ordered[key] = cell[key]
-        sorted_cells.append(ordered)
-    
-    puzzle["cells"] = sorted_cells
-    
-    # Use standard json module with proper indentation
-    with open(filename, 'w') as f:
-        json.dump(puzzle, f, indent=2)
-        f.write('\n')
-    
-    print(f"Saved puzzle to {filename}")
 
 def main():
     """Main function to scrape puzzles."""
