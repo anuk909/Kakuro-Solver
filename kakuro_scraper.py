@@ -79,57 +79,90 @@ def parse_cell(cell: BeautifulSoup, x: int, y: int) -> dict | None:
     """Parse individual cell into JSON format."""
     cell_data = {"x": x, "y": y}
 
-    # Check if it's a wall cell (no input field and no sums)
-    if not cell.find("input") and not cell.find_all("div", string=re.compile(r"\d+")):
+    # Check if it's a wall cell (empty or no divs)
+    divs = cell.find_all("div")
+    if not divs:
         return {"x": x, "y": y, "wall": True}
 
-    # Find sum values in divs
-    divs = cell.find_all("div", string=re.compile(r"\d+"))
-    if not divs:
-        # Check for solution value
-        input_field = cell.find("input")
-        if isinstance(input_field, Tag):
-            value_str = input_field.get("value")
-            if value_str and isinstance(value_str, str):
-                try:
-                    value = int(value_str.strip())
-                    if 1 <= value <= 9:  # Only include valid values
-                        return {"x": x, "y": y, "value": value}
-                except (ValueError, TypeError):
-                    pass
-        return None  # Empty cell or invalid value
-
-    # Parse sums - first div is usually right sum, second is down sum
-    for i, div in enumerate(divs):
+    # Find sum values using class-based identification
+    for div in divs:
+        if not isinstance(div, Tag):
+            continue
+            
         try:
             value = int(div.text.strip())
-            if i == 0 and len(divs) == 1:  # Single sum - check position
-                if div.get("style", "").find("border-left") >= 0:
-                    cell_data["right"] = value
-                else:
-                    cell_data["down"] = value
-            elif i == 0:  # First of multiple sums
+            classes = div.get("class", [])
+            if isinstance(classes, list) and "bottomNumberHelp" in classes:
                 cell_data["right"] = value
-            else:
+            elif isinstance(classes, list) and "topNumberHelp" in classes:
                 cell_data["down"] = value
-        except ValueError:
+        except (ValueError, TypeError):
             continue
-    return cell_data if len(cell_data) > 2 else None
+
+    # Only return cells with clues or wall
+    return cell_data if len(cell_data) > 2 or cell_data.get("wall") else None
 
 
-def save_puzzle(puzzle: dict, size: str, difficulty: str, puzzle_id: int):
+def save_puzzle(puzzle: dict, size: str, difficulty: str, puzzle_id: int | None):
     """Save puzzle to JSON file with compact formatting."""
-    # Ensure cells are sorted correctly: wall, clue (right/down), solution
-    puzzle["cells"]
+    if puzzle_id is None:
+        raise ValueError("Missing puzzle ID")
+
+    # Sort cells to match example order: wall cells first, then clues
+    puzzle["cells"].sort(key=lambda c: (
+        not c.get("wall", False),  # Wall cells first
+        c.get("x", 0),            # Then by x coordinate
+        c.get("y", 0)             # Then by y coordinate
+    ))
+
+    # Format cells with exact property order
+    formatted_cells = []
+    for cell in puzzle["cells"]:
+        ordered = {}
+        # Maintain exact property order
+        for key in ["x", "y", "wall", "right", "down"]:
+            if key in cell:
+                ordered[key] = cell[key]
+        formatted_cells.append(ordered)
+
+    # Create formatted puzzle with exact structure
+    formatted_puzzle = {
+        "size": puzzle["size"],
+        "cells": formatted_cells
+    }
 
     # Create kakuroconquest directory if it doesn't exist
     os.makedirs("kakuroconquest", exist_ok=True)
 
     filename = f"kakuroconquest/{size}_{difficulty}_{puzzle_id}.json"
 
-    # Save with compact JSON formatting
+    # Format JSON with exact spacing and indentation
     with open(filename, "w") as f:
-        json.dump(puzzle, f, separators=(",", ":"))
+        # Format size array on one line with proper spacing
+        size_str = f'[{formatted_puzzle["size"][0]}, {formatted_puzzle["size"][1]}]'
+        
+        # Format each cell object on one line with proper spacing
+        cells_str = []
+        for cell in formatted_cells:
+            parts = []
+            for key in ["x", "y", "wall", "right", "down"]:
+                if key in cell:
+                    value = cell[key]
+                    if isinstance(value, bool):
+                        parts.append(f'"{key}": {str(value).lower()}')
+                    else:
+                        parts.append(f'"{key}": {value}')
+            cell_str = "{ " + ", ".join(parts) + " }"
+            cells_str.append("    " + cell_str)
+        
+        # Build final JSON string with exact formatting
+        json_str = "{\n"
+        json_str += f'  "size": {size_str},\n'
+        json_str += '  "cells": [\n'
+        json_str += ",\n".join(cells_str)
+        json_str += "\n  ]\n"
+        json_str += "}"  # No trailing newline to match example
+        f.write(json_str)
 
     print(f"Saved puzzle to {filename}")
 
