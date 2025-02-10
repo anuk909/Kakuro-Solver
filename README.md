@@ -86,7 +86,7 @@ The input JSON file should have the following structure:
 
 ```json
 {
-  "size": [number of rows, number of columns],
+  "size": [number_of_rows, number_of_columns],
   "cells": [
     { "x": row, "y": column, "wall": true },
     { "x": row, "y": column, "right": sum },
@@ -98,6 +98,8 @@ The input JSON file should have the following structure:
 
 - `size`: A list containing the number of rows and columns of the puzzle.
 - `cells`: A list of cell definitions. Each cell can be a wall, a clue cell with a sum, or a pre-filled cell with a value. The value key is used for the JSON output too.
+
+You can see full input files examples in [examples/puzzle.json](examples/puzzle.json) and [examples/harder_puzzle.json](examples/harder_puzzle.json)
 
 ## Contact
 
