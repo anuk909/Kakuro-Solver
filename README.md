@@ -127,6 +127,31 @@ The output JSON file should have the following structure:
 
 You can see full files examples in [examples/puzzle.json](examples/puzzle.json), [examples/harder_puzzle.json](examples/harder_puzzle.json) and [examples/puzzle_sol.json](examples/puzzle_sol.json).
 
+### Puzzle Scraper
+
+The project includes tools to scrape puzzles from kakuroconquest.com and validate their format:
+
+```sh
+# Scrape puzzles (saves to puzzles/ directory)
+python kakuro_scraper.py
+
+# Validate scraped puzzles
+python kakuro_validator.py
+```
+
+The scraper:
+- Downloads puzzles from kakuroconquest.com with rate limiting
+- Supports all puzzle sizes (4x4 to 9x17) and difficulties
+- Converts puzzles to the required JSON format
+- Includes solution values when available
+- Saves puzzles in a consistent format: `puzzles/scraped_{size}_{difficulty}_{id}.json`
+
+The validator:
+- Verifies puzzle format matches requirements
+- Checks all fields have correct types
+- Validates solution values are in range 1-9
+- Provides detailed error messages for invalid puzzles
+
 ## Contact
 
 For any questions or feedback, please contact [anuk909@gmail.com](mailto:anuk909@gmail.com).

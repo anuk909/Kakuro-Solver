@@ -1,8 +1,8 @@
-from z3 import *
+from z3 import Solver, Int, Sum, Distinct, sat
 import json
 import argparse
 from pathlib import Path
-from common import KakuroPuzzle, Solution, Cell, SolutionCell
+from common import KakuroPuzzle, Solution, Cell, SolutionCell, load_puzzle_data
 
 
 def get_sum_run(
@@ -85,10 +85,9 @@ def main() -> None:
 
     input_file = args.input
 
-    with open(input_file, "r") as f:
-        puzzle_data = json.load(f)
-
-    puzzle = KakuroPuzzle(puzzle_data["size"], puzzle_data["cells"])
+    puzzle_data = load_puzzle_data(input_file)
+    size: tuple[int, int] = (puzzle_data["size"][0], puzzle_data["size"][1])
+    puzzle = KakuroPuzzle(size, puzzle_data["cells"])
 
     solution = solve_kakuro(puzzle)
     if solution is None:
