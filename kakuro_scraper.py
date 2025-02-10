@@ -222,7 +222,7 @@ def save_puzzle(puzzle: Dict, size: str, difficulty: str, puzzle_id: int, puzzle
     # Use puzzle ID in filename to avoid duplicates
     filename = f"kakuroconquest/{size}_{difficulty}_{puzzle_id}.json"
     
-    # Sort cells and maintain property order
+    # Sort cells by type and coordinates
     sorted_cells = []
     for cell in sort_cells(puzzle["cells"]):
         ordered = {}
