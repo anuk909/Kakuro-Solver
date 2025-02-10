@@ -91,7 +91,7 @@ def main() -> None:
 
     solution = solve_kakuro(puzzle)
     if solution is None:
-        print("No solution exists")
+        print(f"No solution exists for {input_file}")
         return
 
     solution_data = {

@@ -10,15 +10,13 @@ from bs4 import BeautifulSoup, Tag
 from common import validate_puzzle_data
 
 
-def get_puzzle_page(size: str, difficulty: str, puzzle_id: int | None = None) -> str:
+def get_puzzle_page(size: str, difficulty: str) -> str:
     """Get puzzle page HTML with rate limiting."""
     base_url = "https://www.kakuroconquest.com"
     url = f"{base_url}/{size}/{difficulty}"
-    if puzzle_id:
-        url += f"/{puzzle_id}"
 
     # Respect rate limits with random delay
-    time.sleep(random.uniform(2.0, 4.0))
+    time.sleep(random.uniform(0.1, 0.2))
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
@@ -35,22 +33,6 @@ def extract_puzzle_id(html: str) -> int | None:
     if match:
         return int(match.group(1))
     return None
-
-
-def sort_cells(cells: list[dict]) -> list[dict]:
-    """Sort cells in order: wall cells, clue cells (right/down), then solution cells."""
-
-    def cell_sort_key(cell: dict) -> tuple[int, int, int]:
-        # Key order: type (wall=0, clue=1, solution=2), x, y
-        if "wall" in cell:
-            type_key = 0
-        elif "right" in cell or "down" in cell:
-            type_key = 1
-        else:
-            type_key = 2
-        return (type_key, cell["x"], cell["y"])
-
-    return sorted(cells, key=cell_sort_key)
 
 
 def parse_puzzle(html: str) -> dict:
@@ -89,9 +71,6 @@ def parse_puzzle(html: str) -> dict:
             cell_data = parse_cell(cell, x, y)
             if cell_data:
                 cells.append(cell_data)
-
-    # Sort cells in correct order
-    cells = sort_cells(cells)
 
     return {"size": size, "cells": cells}
 
@@ -142,11 +121,7 @@ def parse_cell(cell: BeautifulSoup, x: int, y: int) -> dict | None:
 def save_puzzle(puzzle: dict, size: str, difficulty: str, puzzle_id: int):
     """Save puzzle to JSON file with compact formatting."""
     # Ensure cells are sorted correctly: wall, clue (right/down), solution
-    puzzle["cells"] = sort_cells(puzzle["cells"])
-
-    # Add URL to puzzle data
-    base_url = "https://www.kakuroconquest.com"
-    puzzle["url"] = f"{base_url}/{size}/{difficulty}/{puzzle_id}"
+    puzzle["cells"]
 
     # Create kakuroconquest directory if it doesn't exist
     os.makedirs("kakuroconquest", exist_ok=True)
@@ -195,11 +170,6 @@ def main():
                     print(f"Scraping {size} {difficulty} puzzle...")
                     html = get_puzzle_page(size, difficulty)
                     puzzle_id = extract_puzzle_id(html)
-                    if not puzzle_id:
-                        print(f"Could not extract puzzle ID for {size} {difficulty}")
-                        continue
-
-                    html = get_puzzle_page(size, difficulty, puzzle_id)
 
                     puzzle = parse_puzzle(html)
                     is_valid, error = validate_puzzle_data(puzzle)
