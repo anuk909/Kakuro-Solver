@@ -58,21 +58,13 @@ The solver and visualizer can be used via the command line. The following option
 
 ### Solver
 
-To solve a Kakuro puzzle and save the solution as an SVG file:
-
-```sh
-python kakuro_solver.py --input examples/puzzle.json
-```
-
-**SVG Output:**
-
-<img src="examples/solution.svg" width="300">
-
 To solve a Kakuro puzzle and save the solution as a JSON file:
 
 ```sh
 python kakuro_solver.py --input examples/puzzle.json
 ```
+
+If the puzzle is solvable examples/puzzle_sol.json will have data data in the input + the key `solution_cells`.
 
 ### Visualizer
 
