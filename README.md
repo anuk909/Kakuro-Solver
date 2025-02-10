@@ -84,7 +84,7 @@ python kakuru_solver.py --input examples/puzzle.json --output examples/puzzle.sv
 
 The input JSON file should have the following structure:
 
-```json
+```
 {
   "size": [number_of_rows, number_of_columns],
   "cells": [
