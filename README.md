@@ -88,6 +88,19 @@ python kakuro_visualizer.py --input examples/puzzle_sol.json
 
 <img src="examples/puzzle_sol.svg" width="300">
 
+## OCR Module (Experimental)
+
+The `kakuro_ocr.py` script allows you to generate JSON input files from images of Kakuro puzzles using Optical Character Recognition (OCR). Currently only images from [kakuroconquest](https://www.kakuroconquest.com/) have a chance to work.
+
+To process a Kakuro puzzle image and generate a JSON file:
+
+```sh
+python kakuro_ocr.py --input examples/5_5_kakuro.png
+```
+
+If everything goes right, `examples/5_5_kakuro.json` will have the kakuro
+puzzle and you will be able to pass it to the solver and the visualizer (can be usefull to visually validate the result).
+
 #### JSON Format
 
 The input JSON file should have the following structure:
