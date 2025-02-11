@@ -23,7 +23,7 @@ def get_sum_run(
                 break
             cells.append((first_x, y))
 
-    return len(cells), cells
+    return cells
 
 
 def solve_kakuro(puzzle: KakuroPuzzle) -> Solution | None:
@@ -32,33 +32,31 @@ def solve_kakuro(puzzle: KakuroPuzzle) -> Solution | None:
     solver = Solver()
 
     # Create grid of Z3 variables
-    grid = [[Int(f"cell_{i}_{j}") for j in range(cols)] for i in range(rows)]
+    grid = [[Int(f"cell_{col}_{row}") for row in range(rows)] for col in range(cols)]
 
     # Add basic constraints
-    for i in range(rows):
-        for j in range(cols):
-            if clue := puzzle.get_clue(i, j):
-                solver.add(grid[i][j] == 0)
+    for row in range(rows):
+        for col in range(cols):
+            if clue := puzzle.get_clue(col, row):
+                solver.add(grid[col][row] == 0)
             else:
-                solver.add(grid[i][j] >= 1)
-                solver.add(grid[i][j] <= 9)
+                solver.add(grid[col][row] >= 1)
+                solver.add(grid[col][row] <= 9)
 
     # Add sum constraints
     for clue in puzzle.clues:
         x, y, row_sum, col_sum = clue.x, clue.y, clue.row_sum, clue.col_sum
         # Add right sum constraint
         if row_sum is not None:
-            _, right_cells = get_sum_run(puzzle, x, y, "right")
-            if right_cells:
-                cell_vars = [grid[r][c] for r, c in right_cells]
+            if right_cells := get_sum_run(puzzle, x, y, "right"):
+                cell_vars = [grid[col][row] for col, row in right_cells]
                 solver.add(Sum(cell_vars) == row_sum)
                 solver.add(Distinct(cell_vars))
 
         # Add down sum constraint
         if col_sum is not None:
-            _, down_cells = get_sum_run(puzzle, x, y, "down")
-            if down_cells:
-                cell_vars = [grid[r][c] for r, c in down_cells]
+            if down_cells := get_sum_run(puzzle, x, y, "down"):
+                cell_vars = [grid[col][row] for col, row in down_cells]
                 solver.add(Sum(cell_vars) == col_sum)
                 solver.add(Distinct(cell_vars))
 
@@ -66,11 +64,11 @@ def solve_kakuro(puzzle: KakuroPuzzle) -> Solution | None:
         model = solver.model()
         solution_cells = []
 
-        for i in range(rows):
-            for j in range(cols):
-                if value := model.evaluate(grid[i][j]).as_long():
+        for row in range(rows):
+            for col in range(cols):
+                if value := model.evaluate(grid[col][row]).as_long():
                     if value > 0:
-                        solution_cells.append(SolutionCell(i, j, value))
+                        solution_cells.append(SolutionCell(col, row, value))
         return solution_cells
     return None
 
