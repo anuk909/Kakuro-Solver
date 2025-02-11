@@ -1,2 +1,4 @@
 z3-solver
 jsonschema
+requests
+beautifulsoup4

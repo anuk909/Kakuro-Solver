@@ -64,6 +64,55 @@ def load_puzzle_data(file_path: str | Path) -> dict:
     return data
 
 
+def pretty_json_str(puzzle: dict) -> str:
+    """Returns json_str for puzzle dict that looks good"""
+    validate(instance=puzzle, schema=PUZZLE_JSON_SCHEMA)
+    has_solution = "solution_cells" in puzzle
+
+    puzzle["cells"].sort(key=lambda cell: (cell["x"], cell["y"]))
+    if has_solution:
+        puzzle["solution_cells"].sort(key=lambda cell: (cell["x"], cell["y"]))
+
+    size_str = f'[{puzzle["size"][0]}, {puzzle["size"][1]}]'
+
+    # Format each cell object on one line with proper spacing
+    cells_str = []
+    for cell in puzzle["cells"]:
+        parts = []
+        for key, value in cell.items():
+            if isinstance(value, bool):
+                parts.append(f'"{key}": {str(value).lower()}')
+            else:
+                parts.append(f'"{key}": {value}')
+        cell_str = "{ " + ", ".join(parts) + " }"
+        cells_str.append("    " + cell_str)
+
+    if has_solution:
+        solution_cells_str = []
+        for cell in puzzle["solution_cells"]:
+            parts = []
+            for key, value in cell.items():
+                parts.append(f'"{key}": {value}')
+            solution_cell_str = "{ " + ", ".join(parts) + " }"
+            solution_cells_str.append("    " + solution_cell_str)
+
+    # Build final JSON string with exact formatting
+    json_str = "{\n"
+    json_str += f'  "size": {size_str},\n'
+    json_str += '  "cells": [\n'
+    json_str += ",\n".join(cells_str)
+    json_str += "\n  ],\n"
+    if has_solution:
+        json_str += '  "solution_cells": [\n'
+        json_str += ",\n".join(solution_cells_str)
+        json_str += "\n  ]\n"
+    json_str += "}"
+
+    # Make sure that final json is valid
+    validate(json.loads(json_str), PUZZLE_JSON_SCHEMA)
+    return json_str
+
+
 @dataclass
 class SolutionCell:
     x: int

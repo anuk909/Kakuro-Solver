@@ -19,18 +19,18 @@
 <rect x="0" y="240" width="60" height="60" class="wall"/>
 <line x1="0" y1="240" x2="60" y2="300" class="grid-line"/>
 <text x="40" y="260" class="clue-text">16</text>
-<text x="210.0" y="95.0" class="solution">9</text>
-<text x="270.0" y="95.0" class="solution">8</text>
 <text x="90.0" y="155.0" class="solution">1</text>
-<text x="150.0" y="155.0" class="solution">3</text>
-<text x="210.0" y="155.0" class="solution">7</text>
-<text x="270.0" y="155.0" class="solution">9</text>
 <text x="90.0" y="215.0" class="solution">2</text>
-<text x="150.0" y="215.0" class="solution">1</text>
-<text x="210.0" y="215.0" class="solution">5</text>
-<text x="270.0" y="215.0" class="solution">3</text>
 <text x="90.0" y="275.0" class="solution">7</text>
+<text x="150.0" y="155.0" class="solution">3</text>
+<text x="150.0" y="215.0" class="solution">1</text>
 <text x="150.0" y="275.0" class="solution">9</text>
+<text x="210.0" y="95.0" class="solution">9</text>
+<text x="210.0" y="155.0" class="solution">7</text>
+<text x="210.0" y="215.0" class="solution">5</text>
+<text x="270.0" y="95.0" class="solution">8</text>
+<text x="270.0" y="155.0" class="solution">9</text>
+<text x="270.0" y="215.0" class="solution">3</text>
 <rect x="60" y="0" width="60" height="60" class="wall"/>
 <line x1="60" y1="0" x2="120" y2="60" class="grid-line"/>
 <rect x="60" y="60" width="60" height="60" class="wall"/>
@@ -39,18 +39,18 @@
 <rect x="60" y="120" width="60" height="60" class="blank"/>
 <rect x="60" y="180" width="60" height="60" class="blank"/>
 <rect x="60" y="240" width="60" height="60" class="blank"/>
-<text x="210.0" y="95.0" class="solution">9</text>
-<text x="270.0" y="95.0" class="solution">8</text>
 <text x="90.0" y="155.0" class="solution">1</text>
-<text x="150.0" y="155.0" class="solution">3</text>
-<text x="210.0" y="155.0" class="solution">7</text>
-<text x="270.0" y="155.0" class="solution">9</text>
 <text x="90.0" y="215.0" class="solution">2</text>
-<text x="150.0" y="215.0" class="solution">1</text>
-<text x="210.0" y="215.0" class="solution">5</text>
-<text x="270.0" y="215.0" class="solution">3</text>
 <text x="90.0" y="275.0" class="solution">7</text>
+<text x="150.0" y="155.0" class="solution">3</text>
+<text x="150.0" y="215.0" class="solution">1</text>
 <text x="150.0" y="275.0" class="solution">9</text>
+<text x="210.0" y="95.0" class="solution">9</text>
+<text x="210.0" y="155.0" class="solution">7</text>
+<text x="210.0" y="215.0" class="solution">5</text>
+<text x="270.0" y="95.0" class="solution">8</text>
+<text x="270.0" y="155.0" class="solution">9</text>
+<text x="270.0" y="215.0" class="solution">3</text>
 <rect x="120" y="0" width="60" height="60" class="wall"/>
 <line x1="120" y1="0" x2="180" y2="60" class="grid-line"/>
 <rect x="120" y="60" width="60" height="60" class="wall"/>
@@ -60,18 +60,18 @@
 <rect x="120" y="120" width="60" height="60" class="blank"/>
 <rect x="120" y="180" width="60" height="60" class="blank"/>
 <rect x="120" y="240" width="60" height="60" class="blank"/>
-<text x="210.0" y="95.0" class="solution">9</text>
-<text x="270.0" y="95.0" class="solution">8</text>
 <text x="90.0" y="155.0" class="solution">1</text>
-<text x="150.0" y="155.0" class="solution">3</text>
-<text x="210.0" y="155.0" class="solution">7</text>
-<text x="270.0" y="155.0" class="solution">9</text>
 <text x="90.0" y="215.0" class="solution">2</text>
-<text x="150.0" y="215.0" class="solution">1</text>
-<text x="210.0" y="215.0" class="solution">5</text>
-<text x="270.0" y="215.0" class="solution">3</text>
 <text x="90.0" y="275.0" class="solution">7</text>
+<text x="150.0" y="155.0" class="solution">3</text>
+<text x="150.0" y="215.0" class="solution">1</text>
 <text x="150.0" y="275.0" class="solution">9</text>
+<text x="210.0" y="95.0" class="solution">9</text>
+<text x="210.0" y="155.0" class="solution">7</text>
+<text x="210.0" y="215.0" class="solution">5</text>
+<text x="270.0" y="95.0" class="solution">8</text>
+<text x="270.0" y="155.0" class="solution">9</text>
+<text x="270.0" y="215.0" class="solution">3</text>
 <rect x="180" y="0" width="60" height="60" class="wall"/>
 <line x1="180" y1="0" x2="240" y2="60" class="grid-line"/>
 <text x="190" y="50" class="clue-text">21</text>
@@ -80,18 +80,18 @@
 <rect x="180" y="180" width="60" height="60" class="blank"/>
 <rect x="180" y="240" width="60" height="60" class="wall"/>
 <line x1="180" y1="240" x2="240" y2="300" class="grid-line"/>
-<text x="210.0" y="95.0" class="solution">9</text>
-<text x="270.0" y="95.0" class="solution">8</text>
 <text x="90.0" y="155.0" class="solution">1</text>
-<text x="150.0" y="155.0" class="solution">3</text>
-<text x="210.0" y="155.0" class="solution">7</text>
-<text x="270.0" y="155.0" class="solution">9</text>
 <text x="90.0" y="215.0" class="solution">2</text>
-<text x="150.0" y="215.0" class="solution">1</text>
-<text x="210.0" y="215.0" class="solution">5</text>
-<text x="270.0" y="215.0" class="solution">3</text>
 <text x="90.0" y="275.0" class="solution">7</text>
+<text x="150.0" y="155.0" class="solution">3</text>
+<text x="150.0" y="215.0" class="solution">1</text>
 <text x="150.0" y="275.0" class="solution">9</text>
+<text x="210.0" y="95.0" class="solution">9</text>
+<text x="210.0" y="155.0" class="solution">7</text>
+<text x="210.0" y="215.0" class="solution">5</text>
+<text x="270.0" y="95.0" class="solution">8</text>
+<text x="270.0" y="155.0" class="solution">9</text>
+<text x="270.0" y="215.0" class="solution">3</text>
 <rect x="240" y="0" width="60" height="60" class="wall"/>
 <line x1="240" y1="0" x2="300" y2="60" class="grid-line"/>
 <text x="250" y="50" class="clue-text">20</text>
@@ -100,16 +100,16 @@
 <rect x="240" y="180" width="60" height="60" class="blank"/>
 <rect x="240" y="240" width="60" height="60" class="wall"/>
 <line x1="240" y1="240" x2="300" y2="300" class="grid-line"/>
-<text x="210.0" y="95.0" class="solution">9</text>
-<text x="270.0" y="95.0" class="solution">8</text>
 <text x="90.0" y="155.0" class="solution">1</text>
-<text x="150.0" y="155.0" class="solution">3</text>
-<text x="210.0" y="155.0" class="solution">7</text>
-<text x="270.0" y="155.0" class="solution">9</text>
 <text x="90.0" y="215.0" class="solution">2</text>
-<text x="150.0" y="215.0" class="solution">1</text>
-<text x="210.0" y="215.0" class="solution">5</text>
-<text x="270.0" y="215.0" class="solution">3</text>
 <text x="90.0" y="275.0" class="solution">7</text>
+<text x="150.0" y="155.0" class="solution">3</text>
+<text x="150.0" y="215.0" class="solution">1</text>
 <text x="150.0" y="275.0" class="solution">9</text>
+<text x="210.0" y="95.0" class="solution">9</text>
+<text x="210.0" y="155.0" class="solution">7</text>
+<text x="210.0" y="215.0" class="solution">5</text>
+<text x="270.0" y="95.0" class="solution">8</text>
+<text x="270.0" y="155.0" class="solution">9</text>
+<text x="270.0" y="215.0" class="solution">3</text>
 </svg>
