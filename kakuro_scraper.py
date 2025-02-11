@@ -96,16 +96,40 @@ def parse_cell(cell: BeautifulSoup, x: int, y: int) -> dict | None:
     return cell_data
 
 
-def save_puzzle(puzzle: dict, size: str, difficulty: str, puzzle_id: int):
+def save_puzzle(puzzle: dict, size: str, difficulty: str, puzzle_id: int | None):
     """Save puzzle to JSON file with compact formatting."""
     # Create kakuroconquest directory if it doesn't exist
     os.makedirs("kakuroconquest", exist_ok=True)
 
     filename = f"kakuroconquest/{size}_{difficulty}_{puzzle_id}.json"
 
-    # Save with compact JSON formatting
+    # Format JSON with exact spacing and indentation
     with open(filename, "w") as f:
-        json.dump(puzzle, f, separators=(",", ":"))
+        # Format size array on one line with proper spacing
+        size_str = f'[{formatted_puzzle["size"][0]}, {formatted_puzzle["size"][1]}]'
+        
+        # Format each cell object on one line with proper spacing
+        cells_str = []
+        for cell in formatted_cells:
+            parts = []
+            for key in ["x", "y", "wall", "right", "down"]:
+                if key in cell:
+                    value = cell[key]
+                    if isinstance(value, bool):
+                        parts.append(f'"{key}": {str(value).lower()}')
+                    else:
+                        parts.append(f'"{key}": {value}')
+            cell_str = "{ " + ", ".join(parts) + " }"
+            cells_str.append("    " + cell_str)
+        
+        # Build final JSON string with exact formatting
+        json_str = "{\n"
+        json_str += f'  "size": {size_str},\n'
+        json_str += '  "cells": [\n'
+        json_str += ",\n".join(cells_str)
+        json_str += "\n  ]\n"
+        json_str += "}"  # No trailing newline to match example
+        f.write(json_str)
 
     print(f"Saved puzzle to {filename}")
 
