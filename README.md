@@ -93,7 +93,7 @@ python kakuro_visualizer.py --input examples/puzzle_sol.json
 
 ### Kakuro Scraper
 
-The Kakuro Scraper is a tool to automatically scrape Kakuro puzzles from the web and save them in JSON format. The scraper fetches puzzles of various sizes and difficulty levels from the `kakuroconquest` website.
+The Kakuro Scraper is a tool to automatically scrape Kakuro puzzles from the web and save them in JSON format. The scraper fetches puzzles of various sizes and difficulty levels from the [kakuroconquest](https://kakuroconquest.com) website.
 
 The scraper can be used via the command line with the following options:
 
