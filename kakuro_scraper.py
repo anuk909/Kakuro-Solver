@@ -62,8 +62,8 @@ def parse_puzzle(html: str) -> dict:
 
     # Parse cells
     cells = []
-    for x, row in enumerate(rows):
-        for y, cell in enumerate(row.find_all("td")):
+    for y, row in enumerate(rows):
+        for x, cell in enumerate(row.find_all("td")):
             # Skip spacer cells
             if cell.get("class") == "spacer":
                 continue
@@ -79,49 +79,25 @@ def parse_cell(cell: BeautifulSoup, x: int, y: int) -> dict | None:
     """Parse individual cell into JSON format."""
     cell_data = {"x": x, "y": y}
 
-    # Check if it's a wall cell (no input field and no sums)
-    if not cell.find("input") and not cell.find_all("div", string=re.compile(r"\d+")):
-        return {"x": x, "y": y, "wall": True}
-
     # Find sum values in divs
-    divs = cell.find_all("div", string=re.compile(r"\d+"))
-    if not divs:
-        # Check for solution value
-        input_field = cell.find("input")
-        if isinstance(input_field, Tag):
-            value_str = input_field.get("value")
-            if value_str and isinstance(value_str, str):
-                try:
-                    value = int(value_str.strip())
-                    if 1 <= value <= 9:  # Only include valid values
-                        return {"x": x, "y": y, "value": value}
-                except (ValueError, TypeError):
-                    pass
-        return None  # Empty cell or invalid value
-
-    # Parse sums - first div is usually right sum, second is down sum
-    for i, div in enumerate(divs):
-        try:
-            value = int(div.text.strip())
-            if i == 0 and len(divs) == 1:  # Single sum - check position
-                if div.get("style", "").find("border-left") >= 0:
-                    cell_data["right"] = value
-                else:
-                    cell_data["down"] = value
-            elif i == 0:  # First of multiple sums
-                cell_data["right"] = value
-            else:
-                cell_data["down"] = value
-        except ValueError:
-            continue
-    return cell_data if len(cell_data) > 2 else None
+    right_divs = cell.find_all("div", class_="topNumberHelp")
+    down_divs = cell.find_all("div", class_="bottomNumberHelp")
+    if not right_divs and not down_divs:
+        if cell.find("input"):
+            return None
+        else:
+            cell_data["wall"] = True
+            return cell_data
+        
+    if right_divs:
+        cell_data["right"] = int(right_divs[0].text.strip())
+    if down_divs:
+        cell_data["down"] = int(down_divs[0].text.strip())
+    return cell_data
 
 
 def save_puzzle(puzzle: dict, size: str, difficulty: str, puzzle_id: int):
     """Save puzzle to JSON file with compact formatting."""
-    # Ensure cells are sorted correctly: wall, clue (right/down), solution
-    puzzle["cells"]
-
     # Create kakuroconquest directory if it doesn't exist
     os.makedirs("kakuroconquest", exist_ok=True)
 
