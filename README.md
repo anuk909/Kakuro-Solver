@@ -161,9 +161,3 @@ For more details, refer to the `PUZZLE_JSON_SCHEMA` in the source code.
 ## Contact
 
 For any questions or feedback, please contact [anuk909@gmail.com](mailto:anuk909@gmail.com).
-
-## Future Plans
-
-- Write a Medium post about the program to share insights and implementation details.
-- Develop an OCR module to generate JSON input files from images of Kakuro puzzles.
-- Write solvers for many more kinds of puzzles.
