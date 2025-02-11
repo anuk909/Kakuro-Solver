@@ -101,12 +101,13 @@ def pretty_json_str(puzzle: dict) -> str:
     json_str += f'  "size": {size_str},\n'
     json_str += '  "cells": [\n'
     json_str += ",\n".join(cells_str)
-    json_str += "\n  ],\n"
+    json_str += "\n  ]"
     if has_solution:
+        json_str += ",\n"
         json_str += '  "solution_cells": [\n'
         json_str += ",\n".join(solution_cells_str)
-        json_str += "\n  ]\n"
-    json_str += "}"
+        json_str += "\n  ]"
+    json_str += "\n}"
 
     # Make sure that final json is valid
     validate(json.loads(json_str), PUZZLE_JSON_SCHEMA)

@@ -3,6 +3,7 @@ import os
 import random
 import re
 import time
+import traceback
 
 import requests
 from bs4 import BeautifulSoup, Tag
@@ -146,6 +147,7 @@ def main():
         else ["easy", "intermediate", "hard", "challenging", "expert"]
     )
 
+    failed_counter = 0
     for size in sizes:
         for difficulty in difficulties:
             for _ in range(args.count):
@@ -159,7 +161,11 @@ def main():
                     save_puzzle(puzzle, size, difficulty, puzzle_id)
                     print(f"✓ Scraped {size} {difficulty} puzzle {puzzle_id}")
                 except Exception as e:
-                    print(f"✗ Error scraping puzzle: {e}")
+                    failed_counter += 1
+                    print(f"✗ Error scraping puzzle: {e}, {traceback.print_exc()}")
+                    if failed_counter > 3:
+                        print("Too many failures, exiting")
+                        return
                     continue
 
                 # Additional delay between puzzles
