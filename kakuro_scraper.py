@@ -1,5 +1,4 @@
 import argparse
-import json
 import os
 import random
 import re
@@ -96,12 +95,33 @@ def parse_cell(cell: BeautifulSoup, x: int, y: int) -> dict | None:
     return cell_data
 
 
-def save_puzzle(puzzle: dict, size: str, difficulty: str, puzzle_id: int | None):
+def save_puzzle(puzzle: dict, size: str, difficulty: str, puzzle_id: int):
     """Save puzzle to JSON file with compact formatting."""
     # Create kakuroconquest directory if it doesn't exist
     os.makedirs("kakuroconquest", exist_ok=True)
-
     filename = f"kakuroconquest/{size}_{difficulty}_{puzzle_id}.json"
+
+    # Sort cells to match example order: wall cells first, then clues
+    puzzle["cells"].sort(
+        key=lambda c: (
+            not c.get("wall", False),  # Wall cells first
+            c.get("x", 0),  # Then by x coordinate
+            c.get("y", 0),  # Then by y coordinate
+        )
+    )
+
+    # Format cells with exact property order
+    formatted_cells = []
+    for cell in puzzle["cells"]:
+        ordered = {}
+        # Maintain exact property order
+        for key in ["x", "y", "wall", "right", "down"]:
+            if key in cell:
+                ordered[key] = cell[key]
+        formatted_cells.append(ordered)
+
+    # Create formatted puzzle with exact structure
+    formatted_puzzle = {"size": puzzle["size"], "cells": formatted_cells}
 
     # Format JSON with exact spacing and indentation
     with open(filename, "w") as f:
