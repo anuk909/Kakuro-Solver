@@ -102,7 +102,8 @@ The scraper can be used via the command line with the following options:
 - --count: Number of puzzles to scrape per combination (default is 1).
 - --all: Scrape all puzzle combinations.
 
-** Example Commands: **
+**Example Commands:**
+
 To Scrape of a single 4x4 easy puzzle:
 
 ```sh
