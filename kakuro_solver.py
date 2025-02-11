@@ -76,7 +76,7 @@ def solve_kakuro(puzzle: KakuroPuzzle) -> Solution | None:
                 if value := model.evaluate(grid[col][row]).as_long():
                     if value > 0:
                         solution_cells.append(SolutionCell(col, row, value))
-
+        assert len(solution_cells) == rows * cols - len(puzzle.clues)
         return solution_cells
     return None
 
