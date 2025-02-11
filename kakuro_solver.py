@@ -2,7 +2,7 @@ from z3 import *
 import json
 import argparse
 from pathlib import Path
-from common import KakuroPuzzle, Solution, Cell, SolutionCell
+from common import KakuroPuzzle, Solution, Cell, SolutionCell, load_puzzle_data
 
 
 def get_sum_run(
@@ -64,11 +64,11 @@ def solve_kakuro(puzzle: KakuroPuzzle) -> Solution | None:
         model = solver.model()
         solution_cells = []
 
-        for row in range(rows):
-            for col in range(cols):
-                if value := model.evaluate(grid[col][row]).as_long():
-                    if value > 0:
-                        solution_cells.append(SolutionCell(col, row, value))
+        for col in range(cols):
+            for row in range(rows):
+                if value := model.evaluate(grid[col][row]).as_long() and value > 0:
+                    solution_cells.append(SolutionCell(col, row, value))
+
         return solution_cells
     return None
 
@@ -82,15 +82,12 @@ def main() -> None:
     args = parser.parse_args()
 
     input_file = args.input
-
-    with open(input_file, "r") as f:
-        puzzle_data = json.load(f)
-
+    puzzle_data = load_puzzle_data(input_file)
     puzzle = KakuroPuzzle(puzzle_data["size"], puzzle_data["cells"])
 
     solution = solve_kakuro(puzzle)
     if solution is None:
-        print("No solution exists")
+        print(f"No solution exists for {input_file}")
         return
 
     solution_data = {

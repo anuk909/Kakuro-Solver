@@ -1,7 +1,7 @@
 import json
 import argparse
 from pathlib import Path
-from common import KakuroPuzzle, SolutionCell, Solution
+from common import KakuroPuzzle, SolutionCell, Solution, load_puzzle_data
 
 
 def create_svg(puzzle: KakuroPuzzle, solution: Solution) -> str:
@@ -67,14 +67,14 @@ def main() -> None:
     parser.add_argument("--output", "-o", type=Path, help="Output file")
     args = parser.parse_args()
 
-    with open(args.input, "r") as f:
-        puzzle_data = json.load(f)
+    input_file = args.input
+    puzzle_data = load_puzzle_data(input_file)
     puzzle = KakuroPuzzle(puzzle_data["size"], puzzle_data["cells"])
     solution = None
     if "solution_cells" in puzzle_data:
         solution = [SolutionCell(**cell) for cell in puzzle_data["solution_cells"]]
 
-    output_file = args.output or args.input.with_suffix(".svg")
+    output_file = args.output or input_file.with_suffix(".svg")
     print(f"Writing SVG to {output_file}")
     output_file.write_text(create_svg(puzzle, solution))
 
