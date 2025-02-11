@@ -23,12 +23,12 @@ def create_svg(puzzle: KakuroPuzzle, solution: Solution) -> str:
     ]
 
     # Draw cells
-    for i in range(rows):
-        for j in range(cols):
-            x = i * cell_size
-            y = j * cell_size
+    for col in range(cols):
+        for row in range(rows):
+            x = col * cell_size
+            y = row * cell_size
 
-            if clue := puzzle.get_clue(i, j):
+            if clue := puzzle.get_clue(col, row):
                 svg_lines.append(
                     f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="wall"/>'
                 )
