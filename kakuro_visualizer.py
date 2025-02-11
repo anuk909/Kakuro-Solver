@@ -1,7 +1,7 @@
 import json
 import argparse
 from pathlib import Path
-from common import KakuroPuzzle, SolutionCell, Solution
+from common import KakuroPuzzle, SolutionCell, Solution, load_puzzle_data
 
 
 def create_svg(puzzle: KakuroPuzzle, solution: Solution) -> str:
@@ -23,12 +23,12 @@ def create_svg(puzzle: KakuroPuzzle, solution: Solution) -> str:
     ]
 
     # Draw cells
-    for i in range(rows):
-        for j in range(cols):
-            x = i * cell_size
-            y = j * cell_size
+    for col in range(cols):
+        for row in range(rows):
+            x = col * cell_size
+            y = row * cell_size
 
-            if clue := puzzle.get_clue(i, j):
+            if clue := puzzle.get_clue(col, row):
                 svg_lines.append(
                     f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="wall"/>'
                 )
@@ -67,14 +67,14 @@ def main() -> None:
     parser.add_argument("--output", "-o", type=Path, help="Output file")
     args = parser.parse_args()
 
-    with open(args.input, "r") as f:
-        puzzle_data = json.load(f)
+    input_file = args.input
+    puzzle_data = load_puzzle_data(input_file)
     puzzle = KakuroPuzzle(puzzle_data["size"], puzzle_data["cells"])
     solution = None
     if "solution_cells" in puzzle_data:
         solution = [SolutionCell(**cell) for cell in puzzle_data["solution_cells"]]
 
-    output_file = args.output or args.input.with_suffix(".svg")
+    output_file = args.output or input_file.with_suffix(".svg")
     print(f"Writing SVG to {output_file}")
     output_file.write_text(create_svg(puzzle, solution))
 
