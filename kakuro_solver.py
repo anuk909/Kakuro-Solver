@@ -2,7 +2,14 @@ from z3 import *
 import json
 import argparse
 from pathlib import Path
-from common import KakuroPuzzle, Solution, Cell, SolutionCell, load_puzzle_data
+from common import (
+    KakuroPuzzle,
+    Solution,
+    Cell,
+    SolutionCell,
+    load_puzzle_data,
+    pretty_json_str,
+)
 
 
 def get_sum_run(
@@ -66,8 +73,9 @@ def solve_kakuro(puzzle: KakuroPuzzle) -> Solution | None:
 
         for col in range(cols):
             for row in range(rows):
-                if value := model.evaluate(grid[col][row]).as_long() and value > 0:
-                    solution_cells.append(SolutionCell(col, row, value))
+                if value := model.evaluate(grid[col][row]).as_long():
+                    if value > 0:
+                        solution_cells.append(SolutionCell(col, row, value))
 
         return solution_cells
     return None
@@ -100,7 +108,8 @@ def main() -> None:
         input_file.stem + "_sol"
     ).with_suffix(".json")
     print(f"Writing solution to {output_file}")
-    output_file.write_text(json.dumps(solution_data))
+    with open(output_file, "w") as f:
+        f.write(pretty_json_str(solution_data))
 
 
 if __name__ == "__main__":

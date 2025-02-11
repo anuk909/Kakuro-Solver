@@ -24,6 +24,9 @@ Z3 is a high-performance theorem prover developed by Microsoft Research. It is u
 
 - Python 3.11+
 - `z3-solver` library
+- `requests` library
+- `beautifulsoup4` library
+- `jsonschema` library
 
 ## Installation
 
@@ -56,7 +59,7 @@ The solver and visualizer can be used via the command line. The following option
 - `--input` or `-i`: Path to the input JSON file containing the Kakuro puzzle.
 - `--output` or `-o`: Path to the output file where the solution will be saved (output format deduced by suffix).
 
-### Solver
+### Kakuro Solver
 
 To solve a Kakuro puzzle and save the solution as a JSON file:
 
@@ -66,7 +69,7 @@ python kakuro_solver.py --input examples/puzzle.json
 
 If the puzzle is solvable, `examples/puzzle_sol.json` will have the input data + `solution_cells`.
 
-### Visualizer
+### Kakuro Visualizer
 
 To display a Kakuro puzzle as an SVG file:
 
@@ -87,6 +90,38 @@ python kakuro_visualizer.py --input examples/puzzle_sol.json
 **SVG Output:**
 
 <img src="examples/puzzle_sol.svg" width="300">
+
+### Kakuro Scraper
+
+The Kakuro Scraper is a tool to automatically scrape Kakuro puzzles from the web and save them in JSON format. The scraper fetches puzzles of various sizes and difficulty levels from the `kakuroconquest` website.
+
+The scraper can be used via the command line with the following options:
+
+- --size: Specify the puzzle size to scrape (e.g., 4x4, 6x6, 8x8, 9x11, 9x17).
+- --difficulty: Specify the difficulty level to scrape (e.g., easy, intermediate, hard, challenging, expert).
+- --count: Number of puzzles to scrape per combination (default is 1).
+- --all: Scrape all puzzle combinations.
+
+** Example Commands: **
+To Scrape of a single 4x4 easy puzzle:
+
+```sh
+python kakuro_scraper.py --size 4x4 --difficulty easy
+```
+
+To scrape 5 6x6 hard puzzles:
+
+```sh
+python kakuro_scraper.py --size 6x6 --difficulty hard --count 5
+```
+
+To scrape all combinations of sizes and difficulties:
+
+```sh
+python kakuro_scraper.py --all
+```
+
+The scraped puzzles will be saved in the kakuroconquest directory with filenames indicating their size, difficulty, and puzzle ID.
 
 #### JSON Format
 
