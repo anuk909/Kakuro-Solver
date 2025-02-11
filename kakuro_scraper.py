@@ -88,7 +88,7 @@ def parse_cell(cell: BeautifulSoup, x: int, y: int) -> dict | None:
         else:
             cell_data["wall"] = True
             return cell_data
-        
+
     if right_divs:
         cell_data["right"] = int(right_divs[0].text.strip())
     if down_divs:
@@ -107,7 +107,7 @@ def save_puzzle(puzzle: dict, size: str, difficulty: str, puzzle_id: int | None)
     with open(filename, "w") as f:
         # Format size array on one line with proper spacing
         size_str = f'[{formatted_puzzle["size"][0]}, {formatted_puzzle["size"][1]}]'
-        
+
         # Format each cell object on one line with proper spacing
         cells_str = []
         for cell in formatted_cells:
@@ -121,7 +121,7 @@ def save_puzzle(puzzle: dict, size: str, difficulty: str, puzzle_id: int | None)
                         parts.append(f'"{key}": {value}')
             cell_str = "{ " + ", ".join(parts) + " }"
             cells_str.append("    " + cell_str)
-        
+
         # Build final JSON string with exact formatting
         json_str = "{\n"
         json_str += f'  "size": {size_str},\n'
