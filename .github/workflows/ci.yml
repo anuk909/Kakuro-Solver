@@ -35,3 +35,10 @@ jobs:
       run: |
         python -c "import common; print('common.py imports successfully')"
         python -c "import kakuro_visualizer; print('kakuro_visualizer.py imports successfully')"
+        python -c "import kakuro_solver; print('kakuro_solver.py imports successfully')"
+        python -c "import kakuro_scraper; print('kakuro_scraper.py imports successfully')"
+    
+    - name: Test basic functionality
+      run: |
+        python kakuro_visualizer.py --input examples/puzzle.json --output /tmp/test.svg
+        python kakuro_solver.py --input examples/puzzle.json --output /tmp/test_sol.json
