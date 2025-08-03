@@ -1,3 +1,5 @@
+"""Scraper for Kakuro puzzles from kakuroconquest.com."""
+
 import argparse
 import os
 import random
@@ -7,8 +9,9 @@ import traceback
 
 import requests
 from bs4 import BeautifulSoup, Tag
-from common import PUZZLE_JSON_SCHEMA, pretty_json_str
 from jsonschema import validate
+
+from common import PUZZLE_JSON_SCHEMA, pretty_json_str
 
 SOURCE = "kakuroconquest"
 
@@ -24,10 +27,10 @@ def get_puzzle_page(size: str, difficulty: str) -> str:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         return response.text
-    except requests.Timeout:
-        raise ValueError(f"Request timed out for {url}")
+    except requests.Timeout as exc:
+        raise ValueError(f"Request timed out for {url}") from exc
     except requests.RequestException as e:
-        raise ValueError(f"Failed to fetch {url}: {e}")
+        raise ValueError(f"Failed to fetch {url}: {e}") from e
 
 
 def extract_puzzle_id(html: str) -> int | None:
@@ -88,9 +91,8 @@ def parse_cell(cell: BeautifulSoup, x: int, y: int) -> dict | None:
     if not right_divs and not down_divs:
         if cell.find("input"):
             return None
-        else:
-            cell_data["wall"] = True
-            return cell_data
+        cell_data["wall"] = True
+        return cell_data
 
     if right_divs:
         cell_data["right"] = int(right_divs[0].text.strip())
@@ -105,7 +107,7 @@ def save_puzzle(puzzle: dict, size: str, difficulty: str, puzzle_id: int):
     filename = f"{SOURCE}/{size}_{difficulty}_{puzzle_id}.json"
 
     # Format JSON with exact spacing and indentation
-    with open(filename, "w") as f:
+    with open(filename, "w", encoding='utf-8') as f:
         f.write(pretty_json_str(puzzle))
 
     print(f"Saved puzzle to {filename}")
