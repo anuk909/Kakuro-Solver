@@ -1,7 +1,10 @@
-from z3 import *
-import json
+"""Kakuro puzzle solver using Z3 SMT solver."""
+
 import argparse
 from pathlib import Path
+
+from z3 import *  # pylint: disable=wildcard-import,unused-wildcard-import
+
 from common import (
     KakuroPuzzle,
     Solution,
@@ -82,6 +85,7 @@ def solve_kakuro(puzzle: KakuroPuzzle) -> Solution | None:
 
 
 def main() -> None:
+    """Main function to solve Kakuro puzzle."""
     parser = argparse.ArgumentParser(description="Kakuro Puzzle Solver")
     parser.add_argument(
         "--input", "-i", type=Path, required=True, help="Input puzzle file (JSON)"
@@ -108,7 +112,7 @@ def main() -> None:
         input_file.stem + "_sol"
     ).with_suffix(".json")
     print(f"Writing solution to {output_file}")
-    with open(output_file, "w") as f:
+    with open(output_file, "w", encoding='utf-8') as f:
         f.write(pretty_json_str(solution_data))
 
 

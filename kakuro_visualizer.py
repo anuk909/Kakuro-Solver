@@ -1,6 +1,8 @@
-import json
+"""Kakuro puzzle visualizer that creates SVG representations."""
+
 import argparse
 from pathlib import Path
+
 from common import KakuroPuzzle, SolutionCell, Solution, load_puzzle_data
 
 
@@ -12,13 +14,15 @@ def create_svg(puzzle: KakuroPuzzle, solution: Solution) -> str:
     height = rows * cell_size
 
     svg_lines = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" style="background-color: white;">',
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
+        'style="background-color: white;">',
         "<style>",
         ".grid-line { stroke: #000; stroke-width: 1; }",
         ".wall { fill: #c0c0c0; stroke: #000; stroke-width: 1; }",
         ".blank { fill: #ffffff; stroke: #000; stroke-width: 1; }",
         ".clue-text { font-family: Arial,; font-size: 12px; fill: #000; }",
-        ".solution { font-family: Arial; font-size: 24px; fill: #000; text-anchor: middle; dominant-baseline: middle; }",
+        ".solution { font-family: Arial; font-size: 24px; fill: #000; "
+        "text-anchor: middle; dominant-baseline: middle; }",
         "</style>",
     ]
 
@@ -30,29 +34,36 @@ def create_svg(puzzle: KakuroPuzzle, solution: Solution) -> str:
 
             if clue := puzzle.get_clue(col, row):
                 svg_lines.append(
-                    f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="wall"/>'
+                    f'<rect x="{x}" y="{y}" width="{cell_size}" '
+                    f'height="{cell_size}" class="wall"/>'
                 )
                 svg_lines.append(
-                    f'<line x1="{x}" y1="{y}" x2="{x+cell_size}" y2="{y+cell_size}" class="grid-line"/>'
+                    f'<line x1="{x}" y1="{y}" x2="{x+cell_size}" '
+                    f'y2="{y+cell_size}" class="grid-line"/>'
                 )
 
                 if row_sum := clue.row_sum:
                     svg_lines.append(
-                        f'<text x="{x+cell_size-20}" y="{y+20}" class="clue-text">{row_sum}</text>'
+                        f'<text x="{x+cell_size-20}" y="{y+20}" '
+                        f'class="clue-text">{row_sum}</text>'
                     )
                 if col_sum := clue.col_sum:
                     svg_lines.append(
-                        f'<text x="{x+10}" y="{y+cell_size-10}" class="clue-text">{col_sum}</text>'
+                        f'<text x="{x+10}" y="{y+cell_size-10}" '
+                        f'class="clue-text">{col_sum}</text>'
                     )
             else:
                 svg_lines.append(
-                    f'<rect x="{x}" y="{y}" width="{cell_size}" height="{cell_size}" class="blank"/>'
+                    f'<rect x="{x}" y="{y}" width="{cell_size}" '
+                    f'height="{cell_size}" class="blank"/>'
                 )
 
         if solution:
             for cell in solution:
                 svg_lines.append(
-                    f'<text x="{cell.x * cell_size + cell_size/2}" y="{cell.y * cell_size + cell_size/2 + 5}" class="solution">{cell.value}</text>'
+                    f'<text x="{cell.x * cell_size + cell_size/2}" '
+                    f'y="{cell.y * cell_size + cell_size/2 + 5}" '
+                    f'class="solution">{cell.value}</text>'
                 )
 
     svg_lines.append("</svg>")
@@ -60,6 +71,7 @@ def create_svg(puzzle: KakuroPuzzle, solution: Solution) -> str:
 
 
 def main() -> None:
+    """Main function to create SVG visualization of Kakuro puzzle."""
     parser = argparse.ArgumentParser(description="Kakuro Puzzle Visualizer")
     parser.add_argument(
         "--input", "-i", type=Path, required=True, help="Input puzzle file (JSON)"

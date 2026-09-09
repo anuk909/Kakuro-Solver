@@ -1,7 +1,10 @@
-from typing import TypeAlias
-from pathlib import Path
-from dataclasses import dataclass
+"""Common classes and functions for Kakuro puzzle handling."""
+
 import json
+from dataclasses import dataclass
+from pathlib import Path
+from typing import TypeAlias
+
 from jsonschema import validate
 
 
@@ -55,11 +58,11 @@ PUZZLE_JSON_SCHEMA = {
 
 def load_puzzle_data(file_path: str | Path) -> dict:
     """Load and validate puzzle data from JSON file."""
-    with open(file_path) as f:
+    with open(file_path, encoding='utf-8') as f:
         try:
             data = json.load(f)
         except json.JSONDecodeError as e:
-            raise ValueError(f"Invalid JSON in {file_path}: {e}")
+            raise ValueError(f"Invalid JSON in {file_path}: {e}") from e
     validate(instance=data, schema=PUZZLE_JSON_SCHEMA)
     return data
 
@@ -116,6 +119,7 @@ def pretty_json_str(puzzle: dict) -> str:
 
 @dataclass
 class SolutionCell:
+    """Represents a solution cell with coordinates and value."""
     x: int
     y: int
     value: int
@@ -126,6 +130,7 @@ Solution: TypeAlias = list[SolutionCell]
 
 @dataclass
 class ClueCell:
+    """Represents a clue cell with sums and wall status."""
     x: int
     y: int
     row_sum: int | None
@@ -134,6 +139,8 @@ class ClueCell:
 
 
 class KakuroPuzzle:
+    """Represents a Kakuro puzzle with size and clue cells."""
+
     def __init__(self, size: PuzzleSize, cells: list[dict]):
         """Initialize puzzle with validated data."""
         self.size = size
@@ -149,11 +156,14 @@ class KakuroPuzzle:
 
     @property
     def clues(self):
+        """Get all clue cells."""
         return self.board.values()
 
     def is_wall(self, col: int, row: int) -> bool:
+        """Check if a cell is a wall."""
         cell = self.board.get((col, row))
         return cell and cell.is_wall
 
     def get_clue(self, col: int, row: int) -> ClueCell | None:
+        """Get clue cell at given coordinates."""
         return self.board.get((col, row))

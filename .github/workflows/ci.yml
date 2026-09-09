@@ -1,0 +1,44 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pylint
+    
+    - name: Lint with pylint
+      run: |
+        pylint *.py
+    
+    - name: Test import functionality
+      run: |
+        python -c "import common; print('common.py imports successfully')"
+        python -c "import kakuro_visualizer; print('kakuro_visualizer.py imports successfully')"
+        python -c "import kakuro_solver; print('kakuro_solver.py imports successfully')"
+        python -c "import kakuro_scraper; print('kakuro_scraper.py imports successfully')"
+    
+    - name: Test basic functionality
+      run: |
+        python kakuro_visualizer.py --input examples/puzzle.json --output /tmp/test.svg
+        python kakuro_solver.py --input examples/puzzle.json --output /tmp/test_sol.json
